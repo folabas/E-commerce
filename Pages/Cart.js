@@ -1,7 +1,7 @@
 // Cart.js
 
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { useCart } from '../contexts/CartContext'; // Assuming you have a cart context
 
 const Cart = () => {
