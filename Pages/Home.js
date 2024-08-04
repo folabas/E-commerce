@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Image, FlatList, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Image, FlatList, ScrollView, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Footer from '../Footer'; // Ensure this path is correct
+import Footer from '../Footer';
 import { useNavigation } from '@react-navigation/core';
+import { useWishlist } from '../contexts/WishlistContext';
+import Toast from 'react-native-toast-message';
 
 const brands = [
   { name: 'Nike', image: require('../images/nike.png') },
@@ -11,14 +13,14 @@ const brands = [
   { name: 'Puma', image: require('../images/puma.png') },
   { name: 'Gucci', image: require('../images/gucci.png') },
   { name: 'Reebok', image: require('../images/reebok.jpeg') },
-  { name: 'Nike', image: require('../images/nike.png') },
-  { name: 'Adidas', image: require('../images/adidas.png') },
-  { name: 'Puma', image: require('../images/puma.png') },
-  { name: 'Gucci', image: require('../images/gucci.png') },
-  { name: 'Nike', image: require('../images/nike.png') },
-  { name: 'Adidas', image: require('../images/adidas.png') },
-  { name: 'Puma', image: require('../images/puma.png') },
-  { name: 'Gucci', image: require('../images/gucci.png') },
+  // Additional brands if needed...
+];
+
+const products = [
+  { id: 1, name: 'Flannel Shirt', brand: 'Adidas', price: '$34.96', rating: 4.8, stock: 5, image: require('../images/flannel.jpg') },
+  { id: 2, name: 'Henley Shirt', brand: 'Reebok', price: '$34.96', rating: 3.7, stock: 5, image: require('../images/henley.jpg') },
+  { id: 3, name: 'Flannel Shirt', brand: 'Adidas', price: '$34.96', rating: 4.8, stock: 5, image: require('../images/flannel.jpg') },
+  { id: 4, name: 'Henley Shirt', brand: 'Reebok', price: '$34.96', rating: 3.7, stock: 5, image: require('../images/henley.jpg') },
 ];
 
 const Home = () => {
@@ -26,6 +28,7 @@ const Home = () => {
   const [selectedBrand, setSelectedBrand] = useState(null); // Initially no brand selected
   const navigation = useNavigation();
   const flatListRef = useRef(null);
+  const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -41,6 +44,32 @@ const Home = () => {
 
     fetchUserName();
   }, []);
+
+  const isProductInWishlist = (productId) => {
+    return wishlist.some(item => item.id === productId);
+  };
+
+  const handleWishlistToggle = (product) => {
+    if (isProductInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+      Toast.show({
+        type: 'success',
+        text1: 'Removed from Wishlist',
+        text2: `${product.name} has been removed from your wishlist.`,
+      });
+    } else {
+      addToWishlist(product);
+      Toast.show({
+        type: 'success',
+        text1: 'Added to Wishlist',
+        text2: `${product.name} has been added to your wishlist.`,
+      });
+    }
+  };
+
+  const handleProductClick = (product) => {
+    navigation.navigate('ProductDetails', { product });
+  };
 
   const { width } = Dimensions.get('window');
   const itemWidth = 100; // Width of each brand item
@@ -64,7 +93,7 @@ const Home = () => {
           </View>
         </View>
       </View>
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.bannerContainer}>
           <View style={styles.bannerContent}>
             <View style={styles.textButtonContainer}>
@@ -106,7 +135,38 @@ const Home = () => {
             )}
           />
         </View>
-      </View>
+        <View style={styles.mostPopularContainer}>
+          <Text style={styles.mostPopularTitle}>Most Popular</Text>
+          {products.map((product) => (
+            <TouchableOpacity key={product.id} onPress={() => handleProductClick(product)}>
+              <View style={styles.card}>
+                <Image source={product.image} style={styles.cardImage} />
+                <View style={styles.cardContent}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardTitle}>{product.name}</Text>
+                    <TouchableOpacity onPress={() => handleWishlistToggle(product)}>
+                      <Icon
+                        name={isProductInWishlist(product.id) ? "heart" : "heart-outline"}
+                        size={24}
+                        color={isProductInWishlist(product.id) ? "#ff6347" : "#000"}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.cardBrand}>{product.brand}</Text>
+                  <View style={styles.cardFooter}>
+                    <Text style={styles.cardPrice}>{product.price}</Text>
+                    <View style={styles.ratingContainer}>
+                      <Icon name="star" size={14} color="#FFA500" />
+                      <Text style={styles.cardRating}>{product.rating}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.cardStock}>{product.stock} in stock</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
       <Footer />
     </View>
   );
@@ -118,6 +178,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     flexDirection: "column",
     justifyContent: "space-between",
+    paddingBottom: 80, // Adjusted to ensure content does not go under the footer
   },
   header: {
     backgroundColor: "#fff",
@@ -132,8 +193,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
+    color: "#000",
   },
   headerRight: {
     flexDirection: "row",
@@ -143,95 +205,143 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   searchIcon: {
-    marginRight: 8,
-  },
-  content: {
-    flex: 1,
+    marginRight: 10,
   },
   bannerContainer: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-    margin: 20,
-    overflow: "hidden",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    position: 'relative',
+    marginHorizontal: 20,
+    marginTop: 20,
   },
   bannerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 30,
-    paddingTop: 0,
-    marginTop: 20,
+    flexDirection: "row",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 10,
+    padding: 15,
+    alignItems: "center",
   },
   textButtonContainer: {
     flex: 1,
   },
   bannerText: {
-    color: "#333",
-    fontSize: 20,
-    fontWeight: "900",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
   bannerButton: {
     backgroundColor: "#000",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
-    width: '60%',
-    marginTop: 10,
   },
   bannerButtonText: {
     color: "#fff",
-    textAlign: 'center',
+    fontSize: 16,
   },
   bannerImage: {
-    width: '20%',
-    height: '100%',
-    resizeMode: 'cover',
+    width: 100,
+    height: 100,
+    borderRadius: 10,
   },
   popularBrandContainer: {
-    marginTop: 10,
-    padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    marginHorizontal: 20,
   },
   popularBrandTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
   brandsContainer: {
-    flexDirection: 'row', // Ensures items are in a row
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   brandContainer: {
-    alignItems: 'center',
-    paddingLeft: -30,
+    marginRight: 10,
+    alignItems: "center",
   },
   logoContainer: {
-    alignItems: 'center',
-    padding: 10,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
   },
   selectedLogo: {
-    backgroundColor: '#333',
-    borderRadius: 50,
-    padding: 10,
+    borderColor: "#000",
+    borderWidth: 2,
   },
   logo: {
-    width: 25,
-    height: 25,
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
   },
   brandName: {
+    marginTop: 5,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  mostPopularContainer: {
+    marginHorizontal: 20,
+  },
+  mostPopularTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  card: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  cardImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+  },
+  cardContent: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  cardBrand: {
+    color: "#888",
+    marginTop: 5,
+  },
+  cardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 10,
+  },
+  cardPrice: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  cardRating: {
+    marginLeft: 5,
     fontSize: 14,
+  },
+  cardStock: {
+    marginTop: 5,
+    color: "#888",
   },
 });
 
