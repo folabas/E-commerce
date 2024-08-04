@@ -17,10 +17,14 @@ const brands = [
 ];
 
 const products = [
-  { id: 1, name: 'Flannel Shirt', brand: 'Adidas', price: '$34.96', rating: 4.8, stock: 5, image: require('../images/flannel.jpg') },
-  { id: 2, name: 'Henley Shirt', brand: 'Reebok', price: '$34.96', rating: 3.7, stock: 5, image: require('../images/henley.jpg') },
-  { id: 3, name: 'Flannel Shirt', brand: 'Adidas', price: '$34.96', rating: 4.8, stock: 5, image: require('../images/flannel.jpg') },
-  { id: 4, name: 'Henley Shirt', brand: 'Reebok', price: '$34.96', rating: 3.7, stock: 5, image: require('../images/henley.jpg') },
+  { id: 1, name: 'Flannel Shirt', brand: 'Adidas', price: 34.96, rating: 4.8, stock: 5, image: require('../images/flannel.jpg'),colors: ['red', 'blue', 'green'],  // Example colors
+    sizes: ['S', 'M', 'L', 'XL'] },
+  { id: 2, name: 'Henley Shirt', brand: 'Reebok', price: 34.96, rating: 3.7, stock: 5, image: require('../images/henley.jpg'), colors: ['red', 'blue', 'green'],  // Example colors
+    sizes: ['S', 'M', 'L', 'XL'] },
+  { id: 3, name: 'Flannel Shirt', brand: 'Adidas', price: 34.96, rating: 4.8, stock: 5, image: require('../images/flannel.jpg'), colors: ['red', 'blue', 'green'],  // Example colors
+    sizes: ['S', 'M', 'L', 'XL'] },
+  { id: 4, name: 'Henley Shirt', brand: 'Reebok', price: 34.96, rating: 3.7, stock: 5, image: require('../images/henley.jpg'), colors: ['red', 'blue', 'green'],  // Example colors
+    sizes: ['S', 'M', 'L', 'XL'] },
 ];
 
 const Home = () => {
@@ -93,7 +97,7 @@ const Home = () => {
           </View>
         </View>
       </View>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.bannerContainer}>
           <View style={styles.bannerContent}>
             <View style={styles.textButtonContainer}>
@@ -136,7 +140,12 @@ const Home = () => {
           />
         </View>
         <View style={styles.mostPopularContainer}>
-          <Text style={styles.mostPopularTitle}>Most Popular</Text>
+          <View style={styles.mostPopularHeader}>
+            <Text style={styles.mostPopularTitle}>Most Popular</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Products')}>
+              <Text style={styles.viewAll}>View All</Text>
+            </TouchableOpacity>
+          </View>
           {products.map((product) => (
             <TouchableOpacity key={product.id} onPress={() => handleProductClick(product)}>
               <View style={styles.card}>
@@ -210,6 +219,7 @@ const styles = StyleSheet.create({
   bannerContainer: {
     marginHorizontal: 20,
     marginTop: 20,
+    marginBottom: 20
   },
   bannerContent: {
     flexDirection: "row",
@@ -231,6 +241,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
+    width: 110
   },
   bannerButtonText: {
     color: "#fff",
@@ -243,6 +254,7 @@ const styles = StyleSheet.create({
   },
   popularBrandContainer: {
     marginHorizontal: 20,
+    marginBottom: 30
   },
   popularBrandTitle: {
     fontSize: 20,
@@ -282,16 +294,25 @@ const styles = StyleSheet.create({
   mostPopularContainer: {
     marginHorizontal: 20,
   },
+  mostPopularHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
   mostPopularTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 10,
+  },
+  viewAll: {
+    fontSize: 16,
+    color: "#0000ff",
   },
   card: {
     flexDirection: "row",
     backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 15,
+    padding: 10,
     marginBottom: 15,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -300,8 +321,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardImage: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 110,
     borderRadius: 10,
   },
   cardContent: {

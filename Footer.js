@@ -21,9 +21,9 @@ const Footer = () => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.iconContainer}
-        onPress={() => navigation.navigate("Cart")}
+        onPress={() => navigation.navigate("Wishlist")}
       >
-        <Icon name="cart-outline" size={26} style={getIconStyle("Cart")} />
+        <Icon name="heart-outline" size={26} style={getIconStyle("Wishlist")} />
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.iconContainer}
@@ -31,11 +31,12 @@ const Footer = () => {
       >
         <Icon name="storefront-outline" size={26} style={getIconStyle("Store")} />
       </TouchableOpacity>
+      
       <TouchableOpacity
         style={styles.iconContainer}
-        onPress={() => navigation.navigate("Wishlist")}
+        onPress={() => navigation.navigate("Cart")}
       >
-        <Icon name="heart-outline" size={26} style={getIconStyle("Wishlist")} />
+        <Icon name="cart-outline" size={26} style={getIconStyle("Cart")} />
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.iconContainer}

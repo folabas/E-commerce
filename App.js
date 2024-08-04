@@ -12,7 +12,7 @@ import useFonts from "./hooks/useFonts";
 import ForgotPassword from "./Pages/ForgotPassword";
 import PasswordResetConfirmation from "./Pages/PasswordResetConfirmation";
 import Home from "./Pages/Home";
-import Search from "./Pages/Search";
+import Search from "./Pages/SearchScreen";
 import { TransitionPresets } from "@react-navigation/stack";
 import StoreScreen from "./Pages/StoreScreen";
 import ProfileScreen from "./Pages/ProfileScreen";
@@ -24,6 +24,8 @@ import ChangePasswordScreen from "./Pages/ChangePasswordScreen";
 import ProductDetails from "./Pages/ProductDetails";
 import { CartProvider } from "./contexts/CartContext";
 import Toast from 'react-native-toast-message';
+import SearchScreen from "./Pages/SearchScreen";
+import Products from "./Pages/Products"
 
 const Stack = createNativeStackNavigator();
 
@@ -92,7 +94,7 @@ export default function App() {
             />
             <Stack.Screen
               name="Search"
-              component={Search}
+              component={SearchScreen}
               options={{
                 headerShown: false,
                 ...TransitionPresets.ModalSlideFromBottomIOS,
@@ -125,11 +127,16 @@ export default function App() {
               component={ProductDetails}
               options={{ headerShown: false }}
             />
+            <Stack.Screen
+              name="Products"
+              component={Products}
+              options={{ headerShown: false }}
+            />
           </Stack.Navigator>
           <StatusBar style="auto" />
         </NavigationContainer>
         <Toast />
-      </WishlistProvider>
+        </WishlistProvider>
     </CartProvider>
   );
 }
