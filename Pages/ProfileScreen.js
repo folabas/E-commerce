@@ -50,7 +50,7 @@ const ProfileScreen = ({ navigation }) => {
               <Icon name="key-outline" size={24} color="#000" />
               <Text style={styles.menuItemText}>Change Password</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Address')}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('AddNewAddress')}>
               <Icon name="location-outline" size={24} color="#000" />
               <Text style={styles.menuItemText}>Address</Text>
             </TouchableOpacity>

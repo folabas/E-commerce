@@ -28,7 +28,9 @@ const Cart = () => {
           <Text style={styles.cartItemName}>{item.name} x{item.quantity}</Text>
           <Text style={styles.cartItemPrice}>{`$${price.toFixed(2)}`}</Text>
           <View style={styles.quantityContainer}>
-            <TouchableOpacity onPress={() => decrementQuantity(item.id)} style={styles.quantityButton}>
+            <TouchableOpacity 
+              onPress={() => item.quantity > 1 && decrementQuantity(item.id)} 
+              style={styles.quantityButton}>
               <Icon name="remove-circle-outline" size={24} color="#333" />
             </TouchableOpacity>
             <Text style={styles.quantityText}>{item.quantity}</Text>
@@ -76,7 +78,9 @@ const Cart = () => {
             renderItem={renderCartItem}
             contentContainerStyle={styles.cartList}
           />
-          <TouchableOpacity style={styles.checkoutButton}>
+          <TouchableOpacity 
+            style={styles.checkoutButton} 
+            onPress={() => navigation.navigate('ReviewsScreen', { cartItems: cart })}>
             <Text style={styles.checkoutButtonText}>Checkout (${calculateTotal()})</Text>
           </TouchableOpacity>
         </>

@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
+const Address = require('./models/Address');
+const authMiddleware = require('./middleware/authMiddleware');
 const app = express();
 
 // Middleware
@@ -77,10 +79,85 @@ app.post('/api/auth/login', async (req, res) => {
 
     res.status(200).json({ 
       token, 
-      name: user.name // Return name during login
+      name: user.name 
     });
   } catch (error) {
     console.error('Login error:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/address - Save an address
+app.post('/api/address', authMiddleware, async (req, res) => {
+  const { name, phoneNumber, street, postalCode, city, state, country } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const address = new Address({
+      user: userId, // Change userId to user to match the schema
+      name,
+      phoneNumber,
+      street,
+      postalCode,
+      city,
+      state,
+      country,
+    });
+
+    await address.save();
+    res.status(201).json({ message: 'Address saved successfully', address });
+  } catch (error) {
+    console.error('Error saving address:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/address - Get all addresses for the user
+app.get('/api/address', authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const addresses = await Address.find({ user: userId }); // Change userId to user to match the schema
+    res.status(200).json(addresses);
+  } catch (error) {
+    console.error('Error retrieving addresses:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PUT /api/address/:id - Update an address
+app.put('/api/address/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    let address = await Address.findOne({ _id: id, user: userId }); // Change userId to user to match the schema
+    if (!address) {
+      return res.status(404).json({ message: 'Address not found' });
+    }
+
+    const updatedData = req.body;
+    address = await Address.findByIdAndUpdate(id, updatedData, { new: true });
+    res.status(200).json({ message: 'Address updated successfully', address });
+  } catch (error) {
+    console.error('Error updating address:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// DELETE /api/address/:id - Delete an address
+app.delete('/api/address/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const address = await Address.findOneAndDelete({ _id: id, user: userId }); // Change userId to user to match the schema
+    if (!address) {
+      return res.status(404).json({ message: 'Address not found' });
+    }
+    res.status(200).json({ message: 'Address deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting address:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 });

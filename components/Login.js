@@ -15,28 +15,34 @@ import CheckBox from 'react-native-check-box';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState(''); // New state for name
+  const [userName, setUserName] = useState('');
   const [isChecked, setChecked] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // New state for password visibility
   const navigation = useNavigation();
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://192.168.207.32:5000/api/auth/login', {
+      const response = await axios.post('http://192.168.93.32:5000/api/auth/login', {
         email,
         password,
-        name, // Sending name to the server if needed
+        userName,
       });
-      
-      // Save user data to AsyncStorage
-      await AsyncStorage.setItem('userName', name);
-      await AsyncStorage.setItem('userEmail', email);
+      const { token } = response.data;
 
-      console.log('Login successful:', response.data);
-      navigation.navigate('Home'); // Navigate to the home screen
+      if (token) {
+        await AsyncStorage.setItem('authToken', token);
+        await AsyncStorage.setItem('userEmail', email);
+        await AsyncStorage.setItem('userName', userName);
+        console.log('Login successful:', response.data);
+        navigation.navigate('Home');
+      } else {
+        throw new Error('Token not provided');
+      }
     } catch (error) {
       console.error('Login failed:', error.response?.data);
       Alert.alert(
@@ -65,10 +71,10 @@ const Login = () => {
         </View>
         <View style={styles.inputContainer}>
           <TextInput
-            placeholder="Name" // Add this input field
+            placeholder="Name"
             style={styles.input}
-            value={name}
-            onChangeText={(text) => setName(text)}
+            value={userName}
+            onChangeText={(text) => setUserName(text)}
           />
           <TextInput
             placeholder="E-Mail"
@@ -76,13 +82,25 @@ const Login = () => {
             value={email}
             onChangeText={(text) => setEmail(text)}
           />
-          <TextInput
-            placeholder="Password"
-            style={styles.input}
-            value={password}
-            onChangeText={(text) => setPassword(text)}
-            secureTextEntry={true}
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              placeholder="Password"
+              style={styles.input}
+              value={password}
+              onChangeText={(text) => setPassword(text)}
+              secureTextEntry={!showPassword} // Toggle visibility
+            />
+            <TouchableOpacity
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Icon
+                name={showPassword ? "eye-off" : "eye"}
+                size={24}
+                color="#000"
+              />
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={styles.optionsContainer}>
           <View style={styles.checkboxContainer}>
@@ -163,6 +181,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: "#ddd",
+  },
+  passwordContainer: {
+    position: 'relative',
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 10,
+    top: 12,
   },
   optionsContainer: {
     flexDirection: "row",

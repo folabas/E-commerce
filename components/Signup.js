@@ -26,7 +26,7 @@ const Signup = () => {
 
     try {
       // Send data to the server
-      const response = await fetch('http://192.168.207.32:5000/api/auth/signup', {
+      const response = await fetch('http://192.168.93.32:5000/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

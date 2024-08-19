@@ -26,6 +26,8 @@ import { CartProvider } from "./contexts/CartContext";
 import Toast from 'react-native-toast-message';
 import SearchScreen from "./Pages/SearchScreen";
 import Products from "./Pages/Products"
+import ReviewsScreen from "./Pages/ReviewsScreen"
+import AddNewAddress from "./Pages/AddNewAddress";
 
 const Stack = createNativeStackNavigator();
 
@@ -130,6 +132,16 @@ export default function App() {
             <Stack.Screen
               name="Products"
               component={Products}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ReviewsScreen"
+              component={ReviewsScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="AddNewAddress"
+              component={AddNewAddress}
               options={{ headerShown: false }}
             />
           </Stack.Navigator>

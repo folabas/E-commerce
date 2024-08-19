@@ -8,24 +8,113 @@ import { useWishlist } from '../contexts/WishlistContext';
 import Toast from 'react-native-toast-message';
 
 const brands = [
-  { name: 'Nike', image: require('../images/nike.png') },
-  { name: 'Adidas', image: require('../images/adidas.png') },
-  { name: 'Puma', image: require('../images/puma.png') },
-  { name: 'Gucci', image: require('../images/gucci.png') },
-  { name: 'Reebok', image: require('../images/reebok.jpeg') },
+  { name: 'NFD', image: require('../images/nike.png') },
+  { name: 'RAPTOR', image: require('../images/adidas.png') },
+  { name: 'FBA', image: require('../images/puma.png') },
+  { name: 'COMPLEX', image: require('../images/gucci.png') },
+  { name: 'RAVE', image: require('../images/reebok.jpeg') },
   // Additional brands if needed...
 ];
 
 const products = [
-  { id: 1, name: 'Flannel Shirt', brand: 'Adidas', price: 34.96, rating: 4.8, stock: 5, image: require('../images/flannel.jpg'),colors: ['red', 'blue', 'green'],  // Example colors
-    sizes: ['S', 'M', 'L', 'XL'] },
-  { id: 2, name: 'Henley Shirt', brand: 'Reebok', price: 34.96, rating: 3.7, stock: 5, image: require('../images/henley.jpg'), colors: ['red', 'blue', 'green'],  // Example colors
-    sizes: ['S', 'M', 'L', 'XL'] },
-  { id: 3, name: 'Flannel Shirt', brand: 'Adidas', price: 34.96, rating: 4.8, stock: 5, image: require('../images/flannel.jpg'), colors: ['red', 'blue', 'green'],  // Example colors
-    sizes: ['S', 'M', 'L', 'XL'] },
-  { id: 4, name: 'Henley Shirt', brand: 'Reebok', price: 34.96, rating: 3.7, stock: 5, image: require('../images/henley.jpg'), colors: ['red', 'blue', 'green'],  // Example colors
-    sizes: ['S', 'M', 'L', 'XL'] },
+  { 
+    id: 1, 
+    name: 'Flannel Shirt', 
+    brand: 'Adidas', 
+    price: 34.96, 
+    rating: 4.8, 
+    stock: 5, 
+    image: require('../images/nfd3.jpg'),
+    colors: ['red', 'blue', 'green'], // Example colors
+    sizes: ['S', 'M', 'L', 'XL'],
+    description: 'This flannel shirt is made from high-quality materials to provide comfort and style.',
+    reviews: [
+      {
+        author: 'John Doe',
+        text: 'Great shirt! Very comfortable and stylish.',
+        rating: 5,
+      },
+      {
+        author: 'Jane Smith',
+        text: 'Good quality but a bit too large.',
+        rating: 4,
+      },
+    ],
+  },
+  { 
+    id: 2, 
+    name: 'Henley Shirt', 
+    brand: 'Reebok', 
+    price: 34.96, 
+    rating: 3.7, 
+    stock: 5, 
+    image: require('../images/henley.jpg'), 
+    colors: ['red', 'blue', 'green'], // Example colors
+    sizes: ['S', 'M', 'L', 'XL'],
+    description: 'This henley shirt is perfect for casual outings and provides a relaxed fit.',
+    reviews: [
+      {
+        author: 'Alice Johnson',
+        text: 'Nice shirt, but the color faded after washing.',
+        rating: 3,
+      },
+      {
+        author: 'Bob Brown',
+        text: 'Perfect fit and very comfortable.',
+        rating: 4,
+      },
+    ],
+  },
+  { 
+    id: 3, 
+    name: 'Flannel Shirt', 
+    brand: 'Adidas', 
+    price: 34.96, 
+    rating: 4.8, 
+    stock: 5, 
+    image: require('../images/flannel.jpg'), 
+    colors: ['red', 'blue', 'green'], // Example colors
+    sizes: ['S', 'M', 'L', 'XL'],
+    description: 'This flannel shirt is made from high-quality materials to provide comfort and style.',
+    reviews: [
+      {
+        author: 'John Doe',
+        text: 'Great shirt! Very comfortable and stylish.',
+        rating: 5,
+      },
+      {
+        author: 'Jane Smith',
+        text: 'Good quality but a bit too large.',
+        rating: 4,
+      },
+    ],
+  },
+  { 
+    id: 4, 
+    name: 'Henley Shirt', 
+    brand: 'Reebok', 
+    price: 34.96, 
+    rating: 3.7, 
+    stock: 5, 
+    image: require('../images/henley.jpg'), 
+    colors: ['red', 'blue', 'green'], // Example colors
+    sizes: ['S', 'M', 'L', 'XL'],
+    description: 'This henley shirt is perfect for casual outings and provides a relaxed fit.',
+    reviews: [
+      {
+        author: 'Alice Johnson',
+        text: 'Nice shirt, but the color faded after washing.',
+        rating: 3,
+      },
+      {
+        author: 'Bob Brown',
+        text: 'Perfect fit and very comfortable.',
+        rating: 4,
+      },
+    ],
+  },
 ];
+
 
 const Home = () => {
   const [userName, setUserName] = useState('There'); // Default name
@@ -163,7 +252,7 @@ const Home = () => {
                   </View>
                   <Text style={styles.cardBrand}>{product.brand}</Text>
                   <View style={styles.cardFooter}>
-                    <Text style={styles.cardPrice}>{product.price}</Text>
+                    <Text style={styles.cardPrice}>${product.price}</Text>
                     <View style={styles.ratingContainer}>
                       <Icon name="star" size={14} color="#FFA500" />
                       <Text style={styles.cardRating}>{product.rating}</Text>

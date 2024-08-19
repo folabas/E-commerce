@@ -33,6 +33,7 @@ const WishlistScreen = () => {
         </View>
       ) : (
         <FlatList
+          showsVerticalScrollIndicator={false}
           data={wishlist}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (

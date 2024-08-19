@@ -1,25 +1,29 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
+// Ensure JWT_SECRET is defined
 const JWT_SECRET = process.env.JWT_SECRET;
-
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is not defined');
 }
 
 const authMiddleware = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
+  // Retrieve the token from the Authorization header
+  const token = req.headers['authorization']?.replace('Bearer ', '');
 
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
   }
 
   try {
+    // Verify the token and decode user info
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded; // Attach user information to request object
+    console.log('Authenticated user:', req.user); // Optional: Log user info for debugging
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Invalid token' });
+    console.error('Token verification failed:', error.message); // Log token errors for debugging
+    res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
 

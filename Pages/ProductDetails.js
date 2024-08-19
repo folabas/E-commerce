@@ -10,10 +10,22 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useCart } from "../contexts/CartContext";
-import placeholderImage from "../images/T-shirt.jpg";
 import Icon from "react-native-vector-icons/Ionicons";
 import Toast from "react-native-toast-message";
 import { useWishlist } from "../contexts/WishlistContext";
+
+// Import local images
+import shirt1 from "../images/shirt1.jpg";
+import shirt2 from "../images/shirt2.jpg";
+import shirt3 from "../images/shirt3.jpg";
+import defaultImage from "../images/T-shirt.jpg";
+
+const imagesArray = [
+  shirt1,
+  shirt2,
+  shirt3,
+  defaultImage,
+];
 
 const ProductDetails = () => {
   const route = useRoute();
@@ -21,9 +33,7 @@ const ProductDetails = () => {
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const { product } = route.params || {};
   const { addToCart } = useCart();
-  const [selectedImage, setSelectedImage] = useState(
-    product?.images?.[0] || product?.image || placeholderImage
-  );
+  const [selectedImage, setSelectedImage] = useState(imagesArray[0] || defaultImage);
   const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] || null);
   const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || null);
   const [quantity, setQuantity] = useState(1);
@@ -39,7 +49,8 @@ const ProductDetails = () => {
     }
   };
 
-  const isProductInWishlist = (productId) => wishlist.some((item) => item.id === productId);
+  const isProductInWishlist = (productId) =>
+    wishlist.some((item) => item.id === productId);
 
   const handleWishlistToggle = () => {
     if (isProductInWishlist(product.id)) {
@@ -86,25 +97,33 @@ const ProductDetails = () => {
           />
         </TouchableOpacity>
       </View>
-      <View style={styles.imageContainer}>
-        {renderImage(selectedImage)}
-      </View>
-      <ScrollView contentContainerStyle={styles.contentContainer}>
-        <FlatList
-          data={product.images || []}
-          horizontal
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.thumbnailContainer}
-              onPress={() => setSelectedImage(item)}
-            >
-              {renderImage(item)}
-            </TouchableOpacity>
-          )}
-          style={styles.thumbnailList}
-          showsHorizontalScrollIndicator={false}
-        />
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        <View style={styles.imageContainer}>
+          <Image
+            source={selectedImage}
+            style={styles.productImage}
+            resizeMode="cover"
+          />
+          <View style={styles.thumbnailOverlay}>
+            <FlatList
+              data={imagesArray}
+              horizontal
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.thumbnailContainer}
+                  onPress={() => setSelectedImage(item)}
+                >
+                  <Image
+                    source={item}
+                    style={styles.thumbnailImage}
+                  />
+                </TouchableOpacity>
+              )}
+              showsHorizontalScrollIndicator={false}
+            />
+          </View>
+        </View>
         <View style={styles.productDetails}>
           <View style={styles.row}>
             <Text style={styles.rating}>
@@ -116,7 +135,7 @@ const ProductDetails = () => {
             <View style={styles.discountTag}>
               <Text style={styles.discountText}>78% OFF</Text>
             </View>
-            <Text style={styles.productPrice}>{price}</Text>
+            <Text style={styles.productPrice}>${price}</Text>
           </View>
           <Text style={styles.productName}>{product.name}</Text>
           <Text style={styles.productBrand}>
@@ -154,10 +173,31 @@ const ProductDetails = () => {
                 ]}
                 onPress={() => setSelectedSize(size)}
               >
-                <Text>{size}</Text>
+                <Text style={selectedSize === size ? styles.selectedSizeText : styles.sizeText}>{size}</Text>
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+        <View style={styles.descriptionContainer}>
+          <Text style={styles.sectionTitle}>Description</Text>
+          <Text style={styles.productDescription}>
+            {product.description || "No description available."}
+          </Text>
+        </View>
+        <View style={styles.reviewsContainer}>
+          <View style={styles.row}>
+            <Text style={styles.sectionTitle}>Reviews(128)</Text>
+            <TouchableOpacity onPress={() => navigation.navigate("ReviewsPage")}>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          {(product.reviews || []).slice(0, 2).map((review, index) => (
+            <View key={index} style={styles.reviewCard}>
+              <Text style={styles.reviewAuthor}>{review.author}</Text>
+              <Text style={styles.reviewText}>{review.text}</Text>
+              <Text style={styles.reviewRating}>Rating: {review.rating}</Text>
+            </View>
+          ))}
         </View>
       </ScrollView>
       <View style={styles.footer}>
@@ -187,22 +227,6 @@ const ProductDetails = () => {
   );
 };
 
-const renderImage = (uri) => {
-  const imageUri =
-    typeof uri === "string" && uri.trim() !== "" ? uri : placeholderImage;
-
-  return (
-    <Image
-      source={typeof uri === "string" ? { uri: imageUri } : imageUri}
-      style={styles.productImage}
-      resizeMode="cover"
-      onError={(error) =>
-        console.error(`Image failed to load from ${imageUri}:`, error)
-      }
-    />
-  );
-};
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -218,13 +242,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   goBackIcon: {
-    padding: 5,
-    borderRadius: 20,
+    padding: 10,
+    borderRadius: 25,
     backgroundColor: "#f5f5f5",
   },
   heartIcon: {
-    padding: 5,
-    borderRadius: 20,
+    padding: 10,
+    borderRadius: 25,
     backgroundColor: "#f5f5f5",
   },
   imageContainer: {
@@ -232,138 +256,182 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: 15,
     overflow: "hidden",
-    marginBottom: 10,
+    marginBottom: 20,
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
   },
   productImage: {
     width: "100%",
     height: "100%",
   },
-  contentContainer: {
-    paddingBottom: 100,
-  },
-  thumbnailList: {
-    marginBottom: 10,
+  thumbnailOverlay: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
     paddingHorizontal: 10,
+    paddingVertical: 10,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   thumbnailContainer: {
-    width: 80,
-    height: 80,
     marginHorizontal: 5,
-    borderRadius: 15,
+    borderRadius: 10,
     overflow: "hidden",
     borderWidth: 2,
-    borderColor: "#ddd",
+    borderColor: "#f5f5f5",
+  },
+  thumbnailImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 10,
+  },
+  scrollViewContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 100,
+    paddingBottom: 80,
   },
   productDetails: {
-    paddingHorizontal: 15,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   row: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 10,
+    alignItems: "center",
+    marginBottom: 5,
   },
   rating: {
-    fontSize: 16,
-    color: "#ffa500",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   discountTag: {
     backgroundColor: "#ff6347",
-    padding: 5,
+    paddingHorizontal: 5,
+    paddingVertical: 3,
     borderRadius: 5,
-    marginRight: 10,
   },
   discountText: {
     color: "#fff",
+    fontSize: 12,
     fontWeight: "bold",
   },
   productPrice: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#ff6347",
   },
   productName: {
-    fontSize: 27,
+    fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
-    marginBottom: 5,
+    marginBottom: 10,
   },
   productBrand: {
     fontSize: 16,
-    color: "#666",
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  inBrand: {
+    fontWeight: "normal",
   },
   productStock: {
     fontSize: 16,
-    color: "#888",
+    fontWeight: "bold",
+    marginBottom: 10,
   },
   inStock: {
-    fontWeight: "bold",
-    color: "#4caf50",
-  },
-  inBrand: {
-    fontWeight: "bold",
-    color: "#4caf50",
+    fontWeight: "normal",
   },
   colorContainer: {
     marginBottom: 20,
-    paddingHorizontal: 15,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
-    color: "#333",
   },
   colorCircles: {
     flexDirection: "row",
-    alignItems: "center",
+    flexWrap: "wrap",
   },
   colorCircle: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginHorizontal: 5,
-    borderWidth: 1,
-    borderColor: "#ccc",
+    marginRight: 10,
+    marginBottom: 10,
   },
   selectedCircle: {
     borderWidth: 2,
-    borderColor: "#000",
+    borderColor: "#ff6347",
   },
   sizeContainer: {
     marginBottom: 20,
-    paddingHorizontal: 15,
   },
   sizeButtons: {
     flexDirection: "row",
     flexWrap: "wrap",
   },
   sizeButton: {
-    padding: 10,
-    borderRadius: 5,
-    margin: 5,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "#fff",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: "#f5f5f5",
+    marginRight: 10,
+    marginBottom: 10,
   },
   selectedSizeButton: {
     backgroundColor: "#ff6347",
-    borderColor: "#ff6347",
+  },
+  sizeText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  selectedSizeText: {
+    color: "#fff",
+  },
+  descriptionContainer: {
+    marginBottom: 20,
+  },
+  productDescription: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  reviewsContainer: {
+    marginBottom: 20,
+  },
+  viewAllText: {
+    color: "#ff6347",
+  },
+  reviewCard: {
+    backgroundColor: "#f5f5f5",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  reviewAuthor: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  reviewText: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  reviewRating: {
+    fontSize: 14,
   },
   footer: {
     position: "absolute",
     bottom: 0,
     width: "100%",
-    padding: 15,
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderTopColor: "#ddd",
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#f5f5f5",
   },
   quantityContainer: {
     flexDirection: "row",
@@ -372,26 +440,25 @@ const styles = StyleSheet.create({
   quantityButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: "#ddd",
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 20,
   },
   quantityButtonText: {
-    fontSize: 18,
+    fontSize: 20,
+    fontWeight: "bold",
   },
   quantityText: {
-    marginHorizontal: 10,
     fontSize: 18,
+    fontWeight: "bold",
+    marginHorizontal: 10,
   },
   addToCartButton: {
-    flex: 1,
     backgroundColor: "#ff6347",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 15,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
   },
   addToCartButtonText: {
     color: "#fff",
@@ -402,11 +469,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    backgroundColor: "#f9f9f9",
   },
   errorText: {
     fontSize: 18,
-    color: "red",
+    fontWeight: "bold",
+    color: "#ff6347",
   },
 });
 

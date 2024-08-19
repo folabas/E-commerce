@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import OnboardingItem from "./OnboardingItem";
-import NextButton from "./NextButton";
 import Paginator from "./paginator";
 import slides from "./slides";
 import { useNavigation, CommonActions } from "@react-navigation/native";
