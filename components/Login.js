@@ -15,7 +15,7 @@ import CheckBox from 'react-native-check-box';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -88,7 +88,7 @@ const Login = () => {
               style={styles.input}
               value={password}
               onChangeText={(text) => setPassword(text)}
-              secureTextEntry={!showPassword} // Toggle visibility
+              secureTextEntry={!showPassword}
             />
             <TouchableOpacity
               style={styles.eyeIcon}

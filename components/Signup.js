@@ -42,18 +42,13 @@ const Signup = () => {
       const result = await response.json();
 
       if (response.ok) {
-        // Handle successful registration
         Alert.alert('Success', 'Account created successfully!');
-        // Save the user's name to AsyncStorage
         await AsyncStorage.setItem('userName', name);
-        // Navigate to the home screen or any other screen
-        navigation.navigate('Login'); // Navigate to the home screen
+        navigation.navigate('Login'); 
       } else {
-        // Handle errors
         Alert.alert('Error', result.message || 'An error occurred during signup.');
       }
     } catch (error) {
-      // Handle network or server errors
       console.error('Signup error:', error);
       Alert.alert('Error', 'An unexpected error occurred.');
     }

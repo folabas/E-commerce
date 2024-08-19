@@ -170,7 +170,6 @@ const ReviewsScreen = ({ route }) => {
               contentContainerStyle={styles.addressList}
             />
 
-            {/* Button to add a new address */}
             <TouchableOpacity
               style={styles.addAddressButton}
               onPress={() => {
@@ -216,7 +215,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   scrollContainer: {
-    paddingTop: 90, // Adjust according to header height
+    paddingTop: 90, 
     padding: 20,
   },
   cartItem: {

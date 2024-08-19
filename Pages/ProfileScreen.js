@@ -32,7 +32,7 @@ const ProfileScreen = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
           <Image
-            source={require('../images/Logo.png')} // Replace with your profile image path
+            source={require('../images/Logo.png')} 
             style={styles.profilePicture}
           />
           <View style={styles.userInfo}>

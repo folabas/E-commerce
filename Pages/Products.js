@@ -13,7 +13,6 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 
-// Sample product data (dummy data)
 const sampleProducts = [
   {
     id: 1,
@@ -23,7 +22,7 @@ const sampleProducts = [
     rating: 4.8,
     stock: 5,
     image: require("../images/nfd3.jpg"),
-    colors: ["red", "blue", "green"], // Example colors
+    colors: ["red", "blue", "green"],
     sizes: ["S", "M", "L", "XL"],
     description:
       "This flannel shirt is made from high-quality materials to provide comfort and style.",
@@ -73,7 +72,7 @@ const sampleProducts = [
     rating: 4.8,
     stock: 5,
     image: require("../images/flannel.jpg"),
-    colors: ["red", "blue", "green"], // Example colors
+    colors: ["red", "blue", "green"],
     sizes: ["S", "M", "L", "XL"],
     description:
       "This flannel shirt is made from high-quality materials to provide comfort and style.",
@@ -98,7 +97,7 @@ const sampleProducts = [
     rating: 3.7,
     stock: 5,
     image: require("../images/henley.jpg"),
-    colors: ["red", "blue", "green"], // Example colors
+    colors: ["red", "blue", "green"],
     sizes: ["S", "M", "L", "XL"],
     description:
       "This henley shirt is perfect for casual outings and provides a relaxed fit.",
@@ -123,7 +122,7 @@ const sampleProducts = [
     rating: 4.8,
     stock: 5,
     image: require("../images/nfd3.jpg"),
-    colors: ["red", "blue", "green"], // Example colors
+    colors: ["red", "blue", "green"],
     sizes: ["S", "M", "L", "XL"],
     description:
       "This flannel shirt is made from high-quality materials to provide comfort and style.",
@@ -148,7 +147,7 @@ const sampleProducts = [
     rating: 3.7,
     stock: 5,
     image: require("../images/henley.jpg"),
-    colors: ["red", "blue", "green"], // Example colors
+    colors: ["red", "blue", "green"],
     sizes: ["S", "M", "L", "XL"],
     description:
       "This henley shirt is perfect for casual outings and provides a relaxed fit.",
@@ -173,7 +172,7 @@ const sampleProducts = [
     rating: 4.8,
     stock: 5,
     image: require("../images/flannel.jpg"),
-    colors: ["red", "blue", "green"], // Example colors
+    colors: ["red", "blue", "green"],
     sizes: ["S", "M", "L", "XL"],
     description:
       "This flannel shirt is made from high-quality materials to provide comfort and style.",
@@ -198,7 +197,7 @@ const sampleProducts = [
     rating: 3.7,
     stock: 5,
     image: require("../images/henley.jpg"),
-    colors: ["red", "blue", "green"], // Example colors
+    colors: ["red", "blue", "green"],
     sizes: ["S", "M", "L", "XL"],
     description:
       "This henley shirt is perfect for casual outings and provides a relaxed fit.",
@@ -221,7 +220,7 @@ const generateProducts = () => {
   let products = [];
   for (let i = 0; i < 50; i++) {
     const baseProduct = sampleProducts[i % sampleProducts.length];
-    const randomPrice = (Math.random() * (60 - 20) + 20).toFixed(2); // Random price between 20 and 60
+    const randomPrice = (Math.random() * (60 - 20) + 20).toFixed(2); 
     products.push({
       ...baseProduct,
       id: i + 1,
@@ -277,10 +276,10 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showPagination, setShowPagination] = useState(false); // State for pagination visibility
+  const [showPagination, setShowPagination] = useState(false); 
   const productsPerPage = 25;
   const navigation = useNavigation();
-  const scrollY = new Animated.Value(0); // Animated value to track scroll position
+  const scrollY = new Animated.Value(0);
 
   useEffect(() => {
     setProducts(generateProducts());
@@ -314,7 +313,6 @@ const Products = () => {
 
   const handleScroll = (event) => {
     const contentOffsetY = event.nativeEvent.contentOffset.y;
-    // Show pagination only if user is at the end
     const contentSizeHeight = event.nativeEvent.contentSize.height;
     const layoutMeasurementHeight = event.nativeEvent.layoutMeasurement.height;
     if (contentOffsetY + layoutMeasurementHeight >= contentSizeHeight - 50) {
@@ -358,7 +356,7 @@ const Products = () => {
         )}
         contentContainerStyle={styles.list}
         onScroll={handleScroll}
-        scrollEventThrottle={16} // How often the scroll event is fired (in milliseconds)
+        scrollEventThrottle={16} 
       />
 
       {showPagination && (
@@ -373,7 +371,7 @@ const Products = () => {
 };
 
 const { width } = Dimensions.get("window");
-const cardWidth = (width - 40) / 2; // Adjusting for margins and padding
+const cardWidth = (width - 40) / 2; 
 
 const styles = StyleSheet.create({
   container: {
@@ -402,9 +400,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   list: {
-    marginTop: 90, // Adjust based on header height
+    marginTop: 90, 
     paddingHorizontal: 10,
-    paddingBottom: 140, // Ensure space for pagination
+    paddingBottom: 140, 
   },
   card: {
     flex: 1,

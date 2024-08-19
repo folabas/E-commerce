@@ -1,23 +1,20 @@
-// BannerCarousel.js
 
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
 
-const { width } = Dimensions.get('window'); // Get screen width for horizontal scrolling
+const { width } = Dimensions.get('window'); 
 
 const BannerCarousel = () => {
   const scrollViewRef = useRef(null);
 
   useEffect(() => {
-    // Setup automatic scrolling every 5 seconds
     const interval = setInterval(() => {
       scrollViewRef.current.scrollTo({
-        x: (scrollViewRef.current.scrollX + width) % (width * 3), // 3 banners in total
+        x: (scrollViewRef.current.scrollX + width) % (width * 3),
         animated: true,
       });
-    }, 5000); // 5 seconds
+    }, 5000); 
 
-    // Cleanup function to clear interval
     return () => clearInterval(interval);
   }, []);
 
@@ -62,15 +59,15 @@ const BannerCarousel = () => {
 
 const styles = StyleSheet.create({
   bannerContainer: {
-    height: 200, // Adjust height as needed
+    height: 200,
   },
   bannerContent: {
-    width: width, // Make each banner take up the full screen width
+    width: width,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
     padding: 30,
-    backgroundColor: '#f5f5f5', // Background color for each banner
+    backgroundColor: '#f5f5f5', 
   },
   textButtonContainer: {
     flex: 1,
@@ -93,7 +90,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   bannerImage: {
-    width: '50%', // Adjust as needed
+    width: '50%', 
     height: '100%',
     resizeMode: 'cover',
   },

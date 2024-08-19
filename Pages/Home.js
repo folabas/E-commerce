@@ -13,7 +13,6 @@ const brands = [
   { name: 'FBA', image: require('../images/puma.png') },
   { name: 'COMPLEX', image: require('../images/gucci.png') },
   { name: 'RAVE', image: require('../images/reebok.jpeg') },
-  // Additional brands if needed...
 ];
 
 const products = [
@@ -25,7 +24,7 @@ const products = [
     rating: 4.8, 
     stock: 5, 
     image: require('../images/nfd3.jpg'),
-    colors: ['red', 'blue', 'green'], // Example colors
+    colors: ['red', 'blue', 'green'],
     sizes: ['S', 'M', 'L', 'XL'],
     description: 'This flannel shirt is made from high-quality materials to provide comfort and style.',
     reviews: [
@@ -49,7 +48,7 @@ const products = [
     rating: 3.7, 
     stock: 5, 
     image: require('../images/henley.jpg'), 
-    colors: ['red', 'blue', 'green'], // Example colors
+    colors: ['red', 'blue', 'green'],
     sizes: ['S', 'M', 'L', 'XL'],
     description: 'This henley shirt is perfect for casual outings and provides a relaxed fit.',
     reviews: [
@@ -73,7 +72,7 @@ const products = [
     rating: 4.8, 
     stock: 5, 
     image: require('../images/flannel.jpg'), 
-    colors: ['red', 'blue', 'green'], // Example colors
+    colors: ['red', 'blue', 'green'], 
     sizes: ['S', 'M', 'L', 'XL'],
     description: 'This flannel shirt is made from high-quality materials to provide comfort and style.',
     reviews: [
@@ -97,7 +96,7 @@ const products = [
     rating: 3.7, 
     stock: 5, 
     image: require('../images/henley.jpg'), 
-    colors: ['red', 'blue', 'green'], // Example colors
+    colors: ['red', 'blue', 'green'], 
     sizes: ['S', 'M', 'L', 'XL'],
     description: 'This henley shirt is perfect for casual outings and provides a relaxed fit.',
     reviews: [
@@ -117,8 +116,8 @@ const products = [
 
 
 const Home = () => {
-  const [userName, setUserName] = useState('There'); // Default name
-  const [selectedBrand, setSelectedBrand] = useState(null); // Initially no brand selected
+  const [userName, setUserName] = useState('There'); 
+  const [selectedBrand, setSelectedBrand] = useState(null);
   const navigation = useNavigation();
   const flatListRef = useRef(null);
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
@@ -165,7 +164,7 @@ const Home = () => {
   };
 
   const { width } = Dimensions.get('window');
-  const itemWidth = 100; // Width of each brand item
+  const itemWidth = 100; 
 
   return (
     <View style={styles.container}>
@@ -276,7 +275,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     flexDirection: "column",
     justifyContent: "space-between",
-    paddingBottom: 80, // Adjusted to ensure content does not go under the footer
+    paddingBottom: 80, 
   },
   header: {
     backgroundColor: "#fff",

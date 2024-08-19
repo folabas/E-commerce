@@ -12,7 +12,7 @@ import { useNavigation } from "@react-navigation/core";
 import Toast from "react-native-toast-message";
 import { useWishlist } from "../contexts/WishlistContext";
 import Footer from "../Footer";
-import products from "../data/products"; // Ensure you have a similar data file or adapt accordingly
+import products from "../data/products";
 
 const StoreScreen = () => {
   const navigation = useNavigation();
@@ -527,7 +527,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#000",
   },
   scrollContainer: {
-    paddingTop: 170, // Adjust according to header and tab height
+    paddingTop: 170,
   },
   productSection: {
     marginVertical: 10,

@@ -18,11 +18,11 @@ const authMiddleware = (req, res, next) => {
   try {
     // Verify the token and decode user info
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // Attach user information to request object
-    console.log('Authenticated user:', req.user); // Optional: Log user info for debugging
+    req.user = decoded; 
+    console.log('Authenticated user:', req.user); 
     next();
   } catch (error) {
-    console.error('Token verification failed:', error.message); // Log token errors for debugging
+    console.error('Token verification failed:', error.message); 
     res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
