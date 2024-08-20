@@ -1,122 +1,135 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Image, FlatList, ScrollView, Dimensions } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Footer from '../Footer';
-import { useNavigation } from '@react-navigation/core';
-import { useWishlist } from '../contexts/WishlistContext';
-import Toast from 'react-native-toast-message';
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+  Image,
+  FlatList,
+  ScrollView,
+  Dimensions,
+} from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Footer from "../Footer";
+import { useNavigation } from "@react-navigation/core";
+import { useWishlist } from "../contexts/WishlistContext";
+import Toast from "react-native-toast-message";
 
 const brands = [
-  { name: 'NFD', image: require('../images/nike.png') },
-  { name: 'RAPTOR', image: require('../images/adidas.png') },
-  { name: 'FBA', image: require('../images/puma.png') },
-  { name: 'COMPLEX', image: require('../images/gucci.png') },
-  { name: 'RAVE', image: require('../images/reebok.jpeg') },
+  { name: "NFD", image: require("../images/nike.png") },
+  { name: "RAPTOR", image: require("../images/adidas.png") },
+  { name: "FBA", image: require("../images/puma.png") },
+  { name: "COMPLEX", image: require("../images/gucci.png") },
+  { name: "RAVE", image: require("../images/reebok.jpeg") },
 ];
 
 const products = [
-  { 
-    id: 1, 
-    name: 'Flannel Shirt', 
-    brand: 'Adidas', 
-    price: 34.96, 
-    rating: 4.8, 
-    stock: 5, 
-    image: require('../images/nfd3.jpg'),
-    colors: ['red', 'blue', 'green'],
-    sizes: ['S', 'M', 'L', 'XL'],
-    description: 'This flannel shirt is made from high-quality materials to provide comfort and style.',
+  {
+    id: 1,
+    name: "Flannel Shirt",
+    brand: "Adidas",
+    price: 34.96,
+    rating: 4.8,
+    stock: 5,
+    image: require("../images/nfd3.jpg"),
+    colors: ["red", "blue", "green"],
+    sizes: ["S", "M", "L", "XL"],
+    description:
+      "This flannel shirt is made from high-quality materials to provide comfort and style.",
     reviews: [
       {
-        author: 'John Doe',
-        text: 'Great shirt! Very comfortable and stylish.',
+        author: "John Doe",
+        text: "Great shirt! Very comfortable and stylish.",
         rating: 5,
       },
       {
-        author: 'Jane Smith',
-        text: 'Good quality but a bit too large.',
+        author: "Jane Smith",
+        text: "Good quality but a bit too large.",
         rating: 4,
       },
     ],
   },
-  { 
-    id: 2, 
-    name: 'Henley Shirt', 
-    brand: 'Reebok', 
-    price: 34.96, 
-    rating: 3.7, 
-    stock: 5, 
-    image: require('../images/henley.jpg'), 
-    colors: ['red', 'blue', 'green'],
-    sizes: ['S', 'M', 'L', 'XL'],
-    description: 'This henley shirt is perfect for casual outings and provides a relaxed fit.',
+  {
+    id: 2,
+    name: "Henley Shirt",
+    brand: "Reebok",
+    price: 34.96,
+    rating: 3.7,
+    stock: 5,
+    image: require("../images/henley.jpg"),
+    colors: ["red", "blue", "green"],
+    sizes: ["S", "M", "L", "XL"],
+    description:
+      "This henley shirt is perfect for casual outings and provides a relaxed fit.",
     reviews: [
       {
-        author: 'Alice Johnson',
-        text: 'Nice shirt, but the color faded after washing.',
+        author: "Alice Johnson",
+        text: "Nice shirt, but the color faded after washing.",
         rating: 3,
       },
       {
-        author: 'Bob Brown',
-        text: 'Perfect fit and very comfortable.',
+        author: "Bob Brown",
+        text: "Perfect fit and very comfortable.",
         rating: 4,
       },
     ],
   },
-  { 
-    id: 3, 
-    name: 'Flannel Shirt', 
-    brand: 'Adidas', 
-    price: 34.96, 
-    rating: 4.8, 
-    stock: 5, 
-    image: require('../images/flannel.jpg'), 
-    colors: ['red', 'blue', 'green'], 
-    sizes: ['S', 'M', 'L', 'XL'],
-    description: 'This flannel shirt is made from high-quality materials to provide comfort and style.',
+  {
+    id: 3,
+    name: "Flannel Shirt",
+    brand: "Adidas",
+    price: 34.96,
+    rating: 4.8,
+    stock: 5,
+    image: require("../images/flannel.jpg"),
+    colors: ["red", "blue", "green"],
+    sizes: ["S", "M", "L", "XL"],
+    description:
+      "This flannel shirt is made from high-quality materials to provide comfort and style.",
     reviews: [
       {
-        author: 'John Doe',
-        text: 'Great shirt! Very comfortable and stylish.',
+        author: "John Doe",
+        text: "Great shirt! Very comfortable and stylish.",
         rating: 5,
       },
       {
-        author: 'Jane Smith',
-        text: 'Good quality but a bit too large.',
+        author: "Jane Smith",
+        text: "Good quality but a bit too large.",
         rating: 4,
       },
     ],
   },
-  { 
-    id: 4, 
-    name: 'Henley Shirt', 
-    brand: 'Reebok', 
-    price: 34.96, 
-    rating: 3.7, 
-    stock: 5, 
-    image: require('../images/henley.jpg'), 
-    colors: ['red', 'blue', 'green'], 
-    sizes: ['S', 'M', 'L', 'XL'],
-    description: 'This henley shirt is perfect for casual outings and provides a relaxed fit.',
+  {
+    id: 4,
+    name: "Henley Shirt",
+    brand: "Reebok",
+    price: 34.96,
+    rating: 3.7,
+    stock: 5,
+    image: require("../images/henley.jpg"),
+    colors: ["red", "blue", "green"],
+    sizes: ["S", "M", "L", "XL"],
+    description:
+      "This henley shirt is perfect for casual outings and provides a relaxed fit.",
     reviews: [
       {
-        author: 'Alice Johnson',
-        text: 'Nice shirt, but the color faded after washing.',
+        author: "Alice Johnson",
+        text: "Nice shirt, but the color faded after washing.",
         rating: 3,
       },
       {
-        author: 'Bob Brown',
-        text: 'Perfect fit and very comfortable.',
+        author: "Bob Brown",
+        text: "Perfect fit and very comfortable.",
         rating: 4,
       },
     ],
   },
 ];
 
-
 const Home = () => {
-  const [userName, setUserName] = useState('There'); 
+  const [userName, setUserName] = useState("There");
   const [selectedBrand, setSelectedBrand] = useState(null);
   const navigation = useNavigation();
   const flatListRef = useRef(null);
@@ -125,12 +138,12 @@ const Home = () => {
   useEffect(() => {
     const fetchUserName = async () => {
       try {
-        const name = await AsyncStorage.getItem('userName');
+        const name = await AsyncStorage.getItem("userName");
         if (name) {
           setUserName(name);
         }
       } catch (error) {
-        console.error('Error fetching user name:', error);
+        console.error("Error fetching user name:", error);
       }
     };
 
@@ -138,33 +151,40 @@ const Home = () => {
   }, []);
 
   const isProductInWishlist = (productId) => {
-    return wishlist.some(item => item.id === productId);
+    return wishlist.some((item) => item.id === productId);
   };
 
   const handleWishlistToggle = (product) => {
     if (isProductInWishlist(product.id)) {
       removeFromWishlist(product.id);
       Toast.show({
-        type: 'success',
-        text1: 'Removed from Wishlist',
+        type: "success",
+        text1: "Removed from Wishlist",
         text2: `${product.name} has been removed from your wishlist.`,
       });
     } else {
       addToWishlist(product);
       Toast.show({
-        type: 'success',
-        text1: 'Added to Wishlist',
+        type: "success",
+        text1: "Added to Wishlist",
         text2: `${product.name} has been added to your wishlist.`,
       });
     }
   };
 
   const handleProductClick = (product) => {
-    navigation.navigate('ProductDetails', { product });
+    navigation.navigate("ProductDetails", { product });
   };
 
-  const { width } = Dimensions.get('window');
-  const itemWidth = 100; 
+  const handleBrandClick = (brand) => {
+    navigation.navigate("Products", { brand });
+  };
+  const handleViewAll = () => {
+    navigation.navigate('Products', { brand: null }); // Pass null or empty string to show all products
+  };
+
+  const { width } = Dimensions.get("window");
+  const itemWidth = 100;
 
   return (
     <View style={styles.container}>
@@ -172,29 +192,58 @@ const Home = () => {
         <StatusBar barStyle="dark-content" />
         <View style={styles.headerTopRow}>
           <TouchableOpacity>
-            <Icon name="menu-outline" size={24} color="#000" style={styles.menuIcon} accessibilityLabel="Menu" />
+            <Icon
+              name="menu-outline"
+              size={24}
+              color="#000"
+              style={styles.menuIcon}
+              accessibilityLabel="Menu"
+            />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Hi {userName}</Text>
           <View style={styles.headerRight}>
             <TouchableOpacity>
-              <Icon name="notifications-outline" size={24} color="#000" style={styles.notificationIcon} accessibilityLabel="Notifications" />
+              <Icon
+                name="notifications-outline"
+                size={24}
+                color="#000"
+                style={styles.notificationIcon}
+                accessibilityLabel="Notifications"
+              />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate("Search")}>
-              <Icon name="search-outline" size={24} color="#000" style={styles.searchIcon} accessibilityLabel="Search" />
+              <Icon
+                name="search-outline"
+                size={24}
+                color="#000"
+                style={styles.searchIcon}
+                accessibilityLabel="Search"
+              />
             </TouchableOpacity>
           </View>
         </View>
       </View>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.bannerContainer}>
           <View style={styles.bannerContent}>
             <View style={styles.textButtonContainer}>
-              <Text style={styles.bannerText}>A look at the outfits of the month.</Text>
-              <TouchableOpacity style={styles.bannerButton} accessibilityLabel="Buy Now">
+              <Text style={styles.bannerText}>
+                A look at the outfits of the month.
+              </Text>
+              <TouchableOpacity
+                style={styles.bannerButton}
+                accessibilityLabel="Buy Now"
+              >
                 <Text style={styles.bannerButtonText}>Buy Now</Text>
               </TouchableOpacity>
             </View>
-            <Image source={require('../images/banner.jpg')} style={styles.bannerImage} />
+            <Image
+              source={require("../images/banner.jpg")}
+              style={styles.bannerImage}
+            />
           </View>
         </View>
         <View style={styles.popularBrandContainer}>
@@ -210,16 +259,15 @@ const Home = () => {
             decelerationRate="fast"
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={[
-                  styles.brandContainer,
-                  { width: itemWidth },
-                ]}
-                onPress={() => setSelectedBrand(item.name)}
+                style={[styles.brandContainer, { width: itemWidth }]}
+                onPress={() => handleBrandClick(item.name)}
               >
-                <View style={[
-                  styles.logoContainer,
-                  selectedBrand === item.name && styles.selectedLogo
-                ]}>
+                <View
+                  style={[
+                    styles.logoContainer,
+                    selectedBrand === item.name && styles.selectedLogo,
+                  ]}
+                >
                   <Image source={item.image} style={styles.logo} />
                 </View>
                 <Text style={styles.brandName}>{item.name}</Text>
@@ -230,22 +278,33 @@ const Home = () => {
         <View style={styles.mostPopularContainer}>
           <View style={styles.mostPopularHeader}>
             <Text style={styles.mostPopularTitle}>Most Popular</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Products')}>
+            <TouchableOpacity onPress={handleViewAll}>
               <Text style={styles.viewAll}>View All</Text>
             </TouchableOpacity>
           </View>
           {products.map((product) => (
-            <TouchableOpacity key={product.id} onPress={() => handleProductClick(product)}>
+            <TouchableOpacity
+              key={product.id}
+              onPress={() => handleProductClick(product)}
+            >
               <View style={styles.card}>
                 <Image source={product.image} style={styles.cardImage} />
                 <View style={styles.cardContent}>
                   <View style={styles.cardHeader}>
                     <Text style={styles.cardTitle}>{product.name}</Text>
-                    <TouchableOpacity onPress={() => handleWishlistToggle(product)}>
+                    <TouchableOpacity
+                      onPress={() => handleWishlistToggle(product)}
+                    >
                       <Icon
-                        name={isProductInWishlist(product.id) ? "heart" : "heart-outline"}
+                        name={
+                          isProductInWishlist(product.id)
+                            ? "heart"
+                            : "heart-outline"
+                        }
                         size={24}
-                        color={isProductInWishlist(product.id) ? "#ff6347" : "#000"}
+                        color={
+                          isProductInWishlist(product.id) ? "#ff6347" : "#000"
+                        }
                       />
                     </TouchableOpacity>
                   </View>
@@ -275,7 +334,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     flexDirection: "column",
     justifyContent: "space-between",
-    paddingBottom: 80, 
+    paddingBottom: 80,
   },
   header: {
     backgroundColor: "#fff",
@@ -307,7 +366,7 @@ const styles = StyleSheet.create({
   bannerContainer: {
     marginHorizontal: 20,
     marginTop: 20,
-    marginBottom: 20
+    marginBottom: 20,
   },
   bannerContent: {
     flexDirection: "row",
@@ -329,7 +388,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
-    width: 110
+    width: 110,
   },
   bannerButtonText: {
     color: "#fff",
@@ -342,7 +401,7 @@ const styles = StyleSheet.create({
   },
   popularBrandContainer: {
     marginHorizontal: 20,
-    marginBottom: 30
+    marginBottom: 30,
   },
   popularBrandTitle: {
     fontSize: 20,

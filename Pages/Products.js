@@ -10,211 +10,9 @@ import {
   Dimensions,
   Animated,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
-
-const sampleProducts = [
-  {
-    id: 1,
-    name: "Flannel Shirt",
-    brand: "Adidas",
-    price: 34.96,
-    rating: 4.8,
-    stock: 5,
-    image: require("../images/nfd3.jpg"),
-    colors: ["red", "blue", "green"],
-    sizes: ["S", "M", "L", "XL"],
-    description:
-      "This flannel shirt is made from high-quality materials to provide comfort and style.",
-    reviews: [
-      {
-        author: "John Doe",
-        text: "Great shirt! Very comfortable and stylish.",
-        rating: 5,
-      },
-      {
-        author: "Jane Smith",
-        text: "Good quality but a bit too large.",
-        rating: 4,
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Henley Shirt",
-    brand: "Reebok",
-    price: 34.96,
-    rating: 3.7,
-    stock: 5,
-    image: require("../images/henley.jpg"),
-    colors: ["red", "blue", "green"], // Example colors
-    sizes: ["S", "M", "L", "XL"],
-    description:
-      "This henley shirt is perfect for casual outings and provides a relaxed fit.",
-    reviews: [
-      {
-        author: "Alice Johnson",
-        text: "Nice shirt, but the color faded after washing.",
-        rating: 3,
-      },
-      {
-        author: "Bob Brown",
-        text: "Perfect fit and very comfortable.",
-        rating: 4,
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: "Flannel Shirt",
-    brand: "Adidas",
-    price: 34.96,
-    rating: 4.8,
-    stock: 5,
-    image: require("../images/flannel.jpg"),
-    colors: ["red", "blue", "green"],
-    sizes: ["S", "M", "L", "XL"],
-    description:
-      "This flannel shirt is made from high-quality materials to provide comfort and style.",
-    reviews: [
-      {
-        author: "John Doe",
-        text: "Great shirt! Very comfortable and stylish.",
-        rating: 5,
-      },
-      {
-        author: "Jane Smith",
-        text: "Good quality but a bit too large.",
-        rating: 4,
-      },
-    ],
-  },
-  {
-    id: 4,
-    name: "Henley Shirt",
-    brand: "Reebok",
-    price: 34.96,
-    rating: 3.7,
-    stock: 5,
-    image: require("../images/henley.jpg"),
-    colors: ["red", "blue", "green"],
-    sizes: ["S", "M", "L", "XL"],
-    description:
-      "This henley shirt is perfect for casual outings and provides a relaxed fit.",
-    reviews: [
-      {
-        author: "Alice Johnson",
-        text: "Nice shirt, but the color faded after washing.",
-        rating: 3,
-      },
-      {
-        author: "Bob Brown",
-        text: "Perfect fit and very comfortable.",
-        rating: 4,
-      },
-    ],
-  },
-  {
-    id: 5,
-    name: "Flannel Shirt",
-    brand: "Adidas",
-    price: 34.96,
-    rating: 4.8,
-    stock: 5,
-    image: require("../images/nfd3.jpg"),
-    colors: ["red", "blue", "green"],
-    sizes: ["S", "M", "L", "XL"],
-    description:
-      "This flannel shirt is made from high-quality materials to provide comfort and style.",
-    reviews: [
-      {
-        author: "John Doe",
-        text: "Great shirt! Very comfortable and stylish.",
-        rating: 5,
-      },
-      {
-        author: "Jane Smith",
-        text: "Good quality but a bit too large.",
-        rating: 4,
-      },
-    ],
-  },
-  {
-    id: 6,
-    name: "Henley Shirt",
-    brand: "Reebok",
-    price: 34.96,
-    rating: 3.7,
-    stock: 5,
-    image: require("../images/henley.jpg"),
-    colors: ["red", "blue", "green"],
-    sizes: ["S", "M", "L", "XL"],
-    description:
-      "This henley shirt is perfect for casual outings and provides a relaxed fit.",
-    reviews: [
-      {
-        author: "Alice Johnson",
-        text: "Nice shirt, but the color faded after washing.",
-        rating: 3,
-      },
-      {
-        author: "Bob Brown",
-        text: "Perfect fit and very comfortable.",
-        rating: 4,
-      },
-    ],
-  },
-  {
-    id: 7,
-    name: "Flannel Shirt",
-    brand: "Adidas",
-    price: 34.96,
-    rating: 4.8,
-    stock: 5,
-    image: require("../images/flannel.jpg"),
-    colors: ["red", "blue", "green"],
-    sizes: ["S", "M", "L", "XL"],
-    description:
-      "This flannel shirt is made from high-quality materials to provide comfort and style.",
-    reviews: [
-      {
-        author: "John Doe",
-        text: "Great shirt! Very comfortable and stylish.",
-        rating: 5,
-      },
-      {
-        author: "Jane Smith",
-        text: "Good quality but a bit too large.",
-        rating: 4,
-      },
-    ],
-  },
-  {
-    id: 8,
-    name: "Henley Shirt",
-    brand: "Reebok",
-    price: 34.96,
-    rating: 3.7,
-    stock: 5,
-    image: require("../images/henley.jpg"),
-    colors: ["red", "blue", "green"],
-    sizes: ["S", "M", "L", "XL"],
-    description:
-      "This henley shirt is perfect for casual outings and provides a relaxed fit.",
-    reviews: [
-      {
-        author: "Alice Johnson",
-        text: "Nice shirt, but the color faded after washing.",
-        rating: 3,
-      },
-      {
-        author: "Bob Brown",
-        text: "Perfect fit and very comfortable.",
-        rating: 4,
-      },
-    ],
-  },
-];
+import sampleProducts from "./sampleProducts";
 
 const generateProducts = () => {
   let products = [];
@@ -274,16 +72,26 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 };
 
 const Products = () => {
+  const route = useRoute();
+  const navigation = useNavigation();
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showPagination, setShowPagination] = useState(false); 
   const productsPerPage = 25;
-  const navigation = useNavigation();
   const scrollY = new Animated.Value(0);
 
+  const { brand = "", category = "" } = route.params || {}; 
+
   useEffect(() => {
-    setProducts(generateProducts());
-  }, []);
+    // Generate and filter the products based on brand and category
+    const allProducts = generateProducts();
+    const filteredProducts = allProducts.filter(
+      (product) =>
+        (brand ? product.brand === brand : true) &&
+        (category ? product.category === category : true)
+    );
+    setProducts(filteredProducts);
+  }, [brand, category]);
 
   const totalPages = Math.ceil(products.length / productsPerPage);
 
@@ -303,14 +111,6 @@ const Products = () => {
     }
   };
 
-  const handleGoBack = () => {
-    navigation.goBack();
-  };
-
-  const handleGoToCart = () => {
-    navigation.navigate("Cart");
-  };
-
   const handleScroll = (event) => {
     const contentOffsetY = event.nativeEvent.contentOffset.y;
     const contentSizeHeight = event.nativeEvent.contentSize.height;
@@ -326,11 +126,11 @@ const Products = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <StatusBar barStyle="dark-content" />
-        <TouchableOpacity onPress={handleGoBack} style={styles.headerIcon}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerIcon}>
           <Icon name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Products</Text>
-        <TouchableOpacity onPress={handleGoToCart} style={styles.headerIcon}>
+        <TouchableOpacity onPress={() => navigation.navigate("Cart")} style={styles.headerIcon}>
           <Icon name="cart-outline" size={24} color="#000" />
         </TouchableOpacity>
       </View>
@@ -356,7 +156,7 @@ const Products = () => {
         )}
         contentContainerStyle={styles.list}
         onScroll={handleScroll}
-        scrollEventThrottle={16} 
+        scrollEventThrottle={16}
       />
 
       {showPagination && (
@@ -371,7 +171,7 @@ const Products = () => {
 };
 
 const { width } = Dimensions.get("window");
-const cardWidth = (width - 40) / 2; 
+const cardWidth = (width - 40) / 2;
 
 const styles = StyleSheet.create({
   container: {
