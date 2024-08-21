@@ -3,12 +3,7 @@ import { View, Text, TextInput, FlatList, ActivityIndicator, TouchableOpacity, S
 import { useDebounce } from 'use-debounce'; // Install this library for debouncing
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-
-const mockData = [
-  { id: '1', name: 'Flannel Shirt', price: '$34.96' },
-  { id: '2', name: 'Henley Shirt', price: '$34.96' },
-  // Add more mock data or fetch from API
-];
+import sampleProducts from './sampleProducts'; // Import sampleProducts
 
 const SearchScreen = () => {
   const [query, setQuery] = useState('');
@@ -31,7 +26,9 @@ const SearchScreen = () => {
     try {
       // Simulate a network request
       setTimeout(() => {
-        const filteredResults = mockData.filter(item => item.name.toLowerCase().includes(debouncedQuery.toLowerCase()));
+        const filteredResults = sampleProducts.filter(item =>
+          item.name.toLowerCase().includes(debouncedQuery.toLowerCase())
+        );
         setResults(filteredResults);
         if (debouncedQuery) {
           setHistory(prev => [...new Set([debouncedQuery, ...prev])]);
@@ -92,11 +89,11 @@ const SearchScreen = () => {
       {debouncedQuery && results.length > 0 && (
         <FlatList
           data={results}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.item} onPress={() => handleItemPress(item)}>
               <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemPrice}>{item.price}</Text>
+              <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
             </TouchableOpacity>
           )}
           ListFooterComponent={renderSearchHistory()}

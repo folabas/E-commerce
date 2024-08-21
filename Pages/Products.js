@@ -121,6 +121,9 @@ const Products = () => {
       setShowPagination(false);
     }
   };
+  const navigateToSearch = () => {
+    navigation.navigate('SearchScreen', { products });
+  };
 
   return (
     <View style={styles.container}>

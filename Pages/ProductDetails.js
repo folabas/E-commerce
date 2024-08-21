@@ -14,18 +14,14 @@ import Icon from "react-native-vector-icons/Ionicons";
 import Toast from "react-native-toast-message";
 import { useWishlist } from "../contexts/WishlistContext";
 
+
 // Import local images
 import shirt1 from "../images/shirt1.jpg";
 import shirt2 from "../images/shirt2.jpg";
 import shirt3 from "../images/shirt3.jpg";
 import defaultImage from "../images/T-shirt.jpg";
 
-const imagesArray = [
-  shirt1,
-  shirt2,
-  shirt3,
-  defaultImage,
-];
+const imagesArray = [shirt1, shirt2, shirt3, defaultImage];
 
 const ProductDetails = () => {
   const route = useRoute();
@@ -33,8 +29,12 @@ const ProductDetails = () => {
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const { product } = route.params || {};
   const { addToCart } = useCart();
-  const [selectedImage, setSelectedImage] = useState(imagesArray[0] || defaultImage);
-  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0] || null);
+  const [selectedImage, setSelectedImage] = useState(
+    imagesArray[0] || defaultImage
+  );
+  const [selectedColor, setSelectedColor] = useState(
+    product?.colors?.[0] || null
+  );
   const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || null);
   const [quantity, setQuantity] = useState(1);
 
@@ -71,7 +71,8 @@ const ProductDetails = () => {
   };
 
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
-  const decrementQuantity = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+  const decrementQuantity = () =>
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   if (!product) {
     return (
@@ -86,10 +87,16 @@ const ProductDetails = () => {
   return (
     <View style={styles.container}>
       <View style={styles.fixedHeader}>
-        <TouchableOpacity style={styles.goBackIcon} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.goBackIcon}
+          onPress={() => navigation.goBack()}
+        >
           <Icon name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.heartIcon} onPress={handleWishlistToggle}>
+        <TouchableOpacity
+          style={styles.heartIcon}
+          onPress={handleWishlistToggle}
+        >
           <Icon
             name={isProductInWishlist(product.id) ? "heart" : "heart-outline"}
             size={24}
@@ -114,10 +121,7 @@ const ProductDetails = () => {
                   style={styles.thumbnailContainer}
                   onPress={() => setSelectedImage(item)}
                 >
-                  <Image
-                    source={item}
-                    style={styles.thumbnailImage}
-                  />
+                  <Image source={item} style={styles.thumbnailImage} />
                 </TouchableOpacity>
               )}
               showsHorizontalScrollIndicator={false}
@@ -127,7 +131,7 @@ const ProductDetails = () => {
         <View style={styles.productDetails}>
           <View style={styles.row}>
             <Text style={styles.rating}>
-              ★ {product.rating.toFixed(1)} (199)
+              ★ {product.rating ? product.rating.toFixed(1) : "0.0"} (199){" "}
             </Text>
             <Icon name="share-social-outline" size={24} color="#000" />
           </View>
@@ -173,7 +177,15 @@ const ProductDetails = () => {
                 ]}
                 onPress={() => setSelectedSize(size)}
               >
-                <Text style={selectedSize === size ? styles.selectedSizeText : styles.sizeText}>{size}</Text>
+                <Text
+                  style={
+                    selectedSize === size
+                      ? styles.selectedSizeText
+                      : styles.sizeText
+                  }
+                >
+                  {size}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -187,7 +199,9 @@ const ProductDetails = () => {
         <View style={styles.reviewsContainer}>
           <View style={styles.row}>
             <Text style={styles.sectionTitle}>Reviews(128)</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("ReviewsPage")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("ReviewsPage")}
+            >
               <Text style={styles.viewAllText}>View All</Text>
             </TouchableOpacity>
           </View>
@@ -234,12 +248,13 @@ const styles = StyleSheet.create({
   },
   fixedHeader: {
     position: "absolute",
-    top: 40,
     width: "100%",
     zIndex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 15,
+    backgroundColor: "#F5F5F5",
+    paddingTop: 30,
   },
   goBackIcon: {
     padding: 10,
@@ -252,6 +267,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   imageContainer: {
+    marginTop:-10,
     width: "100%",
     aspectRatio: 1,
     borderRadius: 15,

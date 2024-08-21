@@ -105,7 +105,7 @@ const sampleProducts = [
   },
   {
     id: 5,
-    name: "Flannel Shirt",
+    name: "NFD Shirt",
     brand: "NFD",
     price: 34.96,
     rating: 4.8,
@@ -131,7 +131,7 @@ const sampleProducts = [
   },
   {
     id: 6,
-    name: "Henley Shirt",
+    name: "FBA Shirt",
     brand: "FBA",
     price: 34.96,
     rating: 3.7,
@@ -157,7 +157,7 @@ const sampleProducts = [
   },
   {
     id: 7,
-    name: "Flannel Shirt",
+    name: "RAPTOR Shirt",
     brand: "RAPTOR",
     price: 34.96,
     rating: 4.8,
