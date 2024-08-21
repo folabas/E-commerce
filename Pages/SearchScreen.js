@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, ActivityIndicator, TouchableOpacity, StyleSheet } from 'react-native';
-import { useDebounce } from 'use-debounce'; // Install this library for debouncing
+import { useDebounce } from 'use-debounce'; 
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import sampleProducts from './sampleProducts'; // Import sampleProducts
+import sampleProducts from './sampleProducts'; 
 
 const SearchScreen = () => {
   const [query, setQuery] = useState('');
@@ -24,7 +24,6 @@ const SearchScreen = () => {
   const handleSearch = async () => {
     setLoading(true);
     try {
-      // Simulate a network request
       setTimeout(() => {
         const filteredResults = sampleProducts.filter(item =>
           item.name.toLowerCase().includes(debouncedQuery.toLowerCase())
@@ -36,7 +35,6 @@ const SearchScreen = () => {
       }, 1000);
     } catch (error) {
       console.error('Search error:', error);
-      // Show an error message to the user
     } finally {
       setLoading(false);
     }

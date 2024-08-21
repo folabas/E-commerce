@@ -180,7 +180,7 @@ const Home = () => {
     navigation.navigate("Products", { brand });
   };
   const handleViewAll = () => {
-    navigation.navigate('Products', { brand: null }); // Pass null or empty string to show all products
+    navigation.navigate('Products', { brand: null });
   };
 
   const { width } = Dimensions.get("window");
