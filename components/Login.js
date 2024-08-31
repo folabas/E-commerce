@@ -22,36 +22,61 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [userName, setUserName] = useState('');
   const [isChecked, setChecked] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // New state for password visibility
+  const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Validation Error', 'Please fill in all fields.');
+      return;
+    }
+  
     try {
-      const response = await axios.post('http://192.168.106.32:5000/api/auth/login', {
+      console.log('Attempting to login with:', { email, password });
+  
+      const response = await axios.post('http://192.168.153.32:5000/api/auth/login', {
         email,
         password,
-        userName,
       });
+  
+      console.log('Login response:', response.data);
+  
       const { token } = response.data;
-
+  
       if (token) {
         await AsyncStorage.setItem('authToken', token);
-        await AsyncStorage.setItem('userEmail', email);
-        await AsyncStorage.setItem('userName', userName);
-        console.log('Login successful:', response.data);
+  
+        // Fetch user profile after login
+        const profileResponse = await axios.get('http://192.168.153.32:5000/api/auth/profile', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+  
+        console.log('Profile response:', profileResponse.data);
+  
+        const { name, email: userEmail, isSeller } = profileResponse.data;
+  
+        await AsyncStorage.setItem('userEmail', userEmail);
+        await AsyncStorage.setItem('userName', name);
+        await AsyncStorage.setItem('isSeller', JSON.stringify(isSeller));
+  
+        console.log('Login successful:', profileResponse.data);
+  
         navigation.navigate('Home');
       } else {
         throw new Error('Token not provided');
       }
     } catch (error) {
-      console.error('Login failed:', error.response?.data);
+      const errorMessage = error.response?.data?.message || error.message || 'Login failed. Please try again.';
+      console.error('Login failed:', errorMessage);
       Alert.alert(
         'Login Failed',
-        error.response?.data?.message || 'Incorrect details provided. Please try again.',
+        errorMessage,
         [{ text: 'OK' }]
       );
     }
   };
+  
+  
 
   return (
     <KeyboardAvoidingView
@@ -81,6 +106,7 @@ const Login = () => {
             style={styles.input}
             value={email}
             onChangeText={(text) => setEmail(text)}
+            keyboardType="email-address"
           />
           <View style={styles.passwordContainer}>
             <TextInput

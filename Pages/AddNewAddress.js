@@ -27,9 +27,10 @@ const AddNewAddress = ({ navigation }) => {
         return;
       }
 
-      const response = await fetch('http://192.168.33.32:5000/api/address', {
+      const response = await fetch('http://192.168.153.32:5000/api/address', {
         method: 'GET',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`, // Add token to Authorization header
         },
       });
@@ -51,20 +52,20 @@ const AddNewAddress = ({ navigation }) => {
       Alert.alert('Validation Error', 'All fields are required');
       return;
     }
-
+  
     setLoading(true);
     Keyboard.dismiss();
-
+  
     try {
       const token = await AsyncStorage.getItem('authToken');
-
+  
       if (!token) {
         Alert.alert('Authentication Error', 'You need to be logged in to save an address');
         setLoading(false);
         return;
       }
-
-      const response = await fetch('http://192.168.93.32:5000/api/address', {
+  
+      const response = await fetch('http://192.168.153.32:5000/api/address', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -80,15 +81,18 @@ const AddNewAddress = ({ navigation }) => {
           country,
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to save address');
       }
-
+  
       const data = await response.json();
       setAddresses(prevAddresses => [...prevAddresses, data.address]);
       resetForm();
-
+  
+      // Show success message
+      Alert.alert('Success', 'Your address has been saved');
+  
       console.log('Address saved:', data);
       navigation.goBack();
     } catch (error) {
@@ -98,6 +102,7 @@ const AddNewAddress = ({ navigation }) => {
       setLoading(false);
     }
   };
+  
 
   const resetForm = () => {
     setName('');
@@ -118,7 +123,7 @@ const AddNewAddress = ({ navigation }) => {
         return;
       }
 
-      const response = await fetch(`http://192.168.106.32:5000/api/address/${id}`, {
+      const response = await fetch(`http://192.168.153.32:5000/api/address/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -144,7 +149,7 @@ const AddNewAddress = ({ navigation }) => {
         <TouchableOpacity onPress={() => handleDeleteAddress(item._id)}>
           <Icon name="trash-outline" size={24} color="red" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => { /* Implement edit functionality */ }}>
+        <TouchableOpacity onPress={() => { }}>
           <Icon name="create-outline" size={24} color="blue" />
         </TouchableOpacity>
       </View>

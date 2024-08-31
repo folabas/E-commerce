@@ -1,4 +1,3 @@
-// App.js
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
@@ -12,8 +11,8 @@ import useFonts from "./hooks/useFonts";
 import ForgotPassword from "./Pages/ForgotPassword";
 import PasswordResetConfirmation from "./Pages/PasswordResetConfirmation";
 import Home from "./Pages/Home";
-import Search from "./Pages/SearchScreen";
 import { TransitionPresets } from "@react-navigation/stack";
+import SearchScreen from "./Pages/SearchScreen";
 import StoreScreen from "./Pages/StoreScreen";
 import ProfileScreen from "./Pages/ProfileScreen";
 import WishlistScreen from "./Pages/WishlistScreen";
@@ -23,11 +22,16 @@ import { WishlistProvider } from "./contexts/WishlistContext";
 import ChangePasswordScreen from "./Pages/ChangePasswordScreen";
 import ProductDetails from "./Pages/ProductDetails";
 import { CartProvider } from "./contexts/CartContext";
-import Toast from 'react-native-toast-message';
-import SearchScreen from "./Pages/SearchScreen";
-import Products from "./Pages/Products"
-import ReviewsScreen from "./Pages/ReviewsScreen"
+import Toast from "react-native-toast-message";
+import Products from "./Pages/Products";
+import ReviewsScreen from "./Pages/ReviewsScreen";
 import AddNewAddress from "./Pages/AddNewAddress";
+import NotificationScreen from "./components/NotificationScreen";
+import Reviews from "./Pages/Reviews";
+import SellerSignUp from "./Pages/SellerSignUp";  // Updated import
+import BusinessInfo from "./components/BusinessInfo";
+import ValidationInfo from "./components/ValidationInfo";
+import FacialVerification from "./components/FacialVerification";
 
 const Stack = createNativeStackNavigator();
 
@@ -144,11 +148,36 @@ export default function App() {
               component={AddNewAddress}
               options={{ headerShown: false }}
             />
+            <Stack.Screen
+              name="NotificationScreen"
+              component={NotificationScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Reviews"
+              component={Reviews}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="SellerSignUp"
+              component={SellerSignUp}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen 
+            name="BusinessInfo"
+            component={BusinessInfo}/>
+            <Stack.Screen
+            name="ValidationInfo"
+            component={ValidationInfo}
+            />
+            <Stack.Screen 
+            name="FacialVerification"
+            component={FacialVerification}/>
           </Stack.Navigator>
           <StatusBar style="auto" />
         </NavigationContainer>
         <Toast />
-        </WishlistProvider>
+      </WishlistProvider>
     </CartProvider>
   );
 }

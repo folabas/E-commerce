@@ -200,7 +200,7 @@ const ProductDetails = () => {
           <View style={styles.row}>
             <Text style={styles.sectionTitle}>Reviews(128)</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate("ReviewsPage")}
+              onPress={() => navigation.navigate("Reviews")}
             >
               <Text style={styles.viewAllText}>View All</Text>
             </TouchableOpacity>
@@ -280,6 +280,7 @@ const styles = StyleSheet.create({
   productImage: {
     width: "100%",
     height: "100%",
+    backgroundColor: "#f5f5f5"
   },
   thumbnailOverlay: {
     position: "absolute",

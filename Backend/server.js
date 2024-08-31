@@ -3,14 +3,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const User = require('./models/User');
 const Address = require('./models/Address');
+const Seller = require('./models/Seller');
 const authMiddleware = require('./middleware/authMiddleware');
 const app = express();
 
 // Middleware
 app.use(cors({
-  origin: '*', 
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -31,13 +33,43 @@ mongoose.connect(mongoURI)
     process.exit(1);
   });
 
+// Function to setup Nodemailer transporter dynamically
+const createTransporter = (emailUser, emailPass) => {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: emailUser,
+      pass: emailPass,
+    },
+  });
+};
+
+const sendSignupEmail = async (userEmail, userName, emailUser, emailPass) => {
+  try {
+    const transporter = createTransporter(emailUser, emailPass);
+
+    const mailOptions = {
+      from: emailUser,
+      to: userEmail,
+      subject: 'Welcome to Our Service!',
+      text: `Hi ${userName},\n\nThank you for signing up. We're excited to have you onboard!`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Signup email sent successfully');
+  } catch (error) {
+    console.error('Error sending signup email:', error.message);
+  }
+};
+
 // POST /api/auth/signup route
 app.post('/api/auth/signup', async (req, res) => {
-  const { email, password, name, surname } = req.body;
+  console.log('Received signup request:', req.body);
+  const { email, password, name, surname, emailUser, emailPass } = req.body;
 
   try {
-    if (!email || !password || !name || !surname) {
-      return res.status(400).json({ message: 'All fields are required' });
+    if (!email || !password || !name || !surname || !emailUser || !emailPass) {
+      return res.status(400).json({ message: 'All fields are required, including email credentials' });
     }
 
     let user = await User.findOne({ email });
@@ -47,6 +79,9 @@ app.post('/api/auth/signup', async (req, res) => {
 
     user = new User({ email, password, name, surname });
     await user.save();
+    console.log('User saved:', user);
+
+    await sendSignupEmail(email, name, emailUser, emailPass);
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
@@ -58,6 +93,7 @@ app.post('/api/auth/signup', async (req, res) => {
 // POST /api/auth/login route
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
+  console.log('Received login request:', { email, password });
 
   try {
     if (!email || !password) {
@@ -75,14 +111,38 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '3h' });
 
-    res.status(200).json({ 
-      token, 
-      name: user.name 
+    res.status(200).json({
+      token,
+      name: user.name
     });
   } catch (error) {
     console.error('Login error:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/auth/profile - Get user's profile including seller status
+app.get('/api/auth/profile', authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if the user is a seller
+    const isSeller = await Seller.findOne({ user: userId });
+
+    res.status(200).json({
+      name: user.name,
+      email: user.email,
+      isSeller: !!isSeller,
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -94,7 +154,7 @@ app.post('/api/address', authMiddleware, async (req, res) => {
 
   try {
     const address = new Address({
-      user: userId, // Change userId to user to match the schema
+      user: userId,
       name,
       phoneNumber,
       street,
@@ -117,7 +177,7 @@ app.get('/api/address', authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const addresses = await Address.find({ user: userId }); // Change userId to user to match the schema
+    const addresses = await Address.find({ user: userId });
     res.status(200).json(addresses);
   } catch (error) {
     console.error('Error retrieving addresses:', error.message);
@@ -131,7 +191,7 @@ app.put('/api/address/:id', authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    let address = await Address.findOne({ _id: id, user: userId }); // Change userId to user to match the schema
+    let address = await Address.findOne({ _id: id, user: userId });
     if (!address) {
       return res.status(404).json({ message: 'Address not found' });
     }
@@ -151,13 +211,106 @@ app.delete('/api/address/:id', authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const address = await Address.findOneAndDelete({ _id: id, user: userId }); // Change userId to user to match the schema
+    const address = await Address.findOneAndDelete({ _id: id, user: userId });
     if (!address) {
       return res.status(404).json({ message: 'Address not found' });
     }
     res.status(200).json({ message: 'Address deleted successfully' });
   } catch (error) {
     console.error('Error deleting address:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/sellers - Create a seller account
+app.post('/api/sellers', async (req, res) => {
+  const {
+    businessName,
+    businessEmail,
+    yearInBusiness,
+    phoneNumber,
+    businessDescription,
+    nin,
+    socialMedia,
+  } = req.body;
+
+  try {
+    if (!businessEmail) {
+      return res.status(400).json({ message: 'Business email is required.' });
+    }
+
+    // Check if a seller with the same email already exists
+    const existingSeller = await Seller.findOne({ businessEmail });
+    if (existingSeller) {
+      return res.status(400).json({ message: 'A seller with this email already exists.' });
+    }
+
+    const seller = new Seller({
+      businessName,
+      businessEmail,
+      yearInBusiness,
+      phoneNumber,
+      businessDescription,
+      nin,
+      socialMedia,
+    });
+
+    await seller.save();
+    res.status(201).json({ message: 'Seller account created successfully', seller });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Duplicate key error: ' + error.message });
+    }
+    console.error('Error creating seller account:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/sellers/:id - Get a seller's details by ID
+app.get('/api/sellers/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const seller = await Seller.findById(id);
+    if (!seller) {
+      return res.status(404).json({ message: 'Seller not found' });
+    }
+    res.status(200).json(seller);
+  } catch (error) {
+    console.error('Error retrieving seller:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PUT /api/sellers/:id - Update a seller's details
+app.put('/api/sellers/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updatedData = req.body;
+    const seller = await Seller.findByIdAndUpdate(id, updatedData, { new: true });
+    if (!seller) {
+      return res.status(404).json({ message: 'Seller not found' });
+    }
+    res.status(200).json({ message: 'Seller updated successfully', seller });
+  } catch (error) {
+    console.error('Error updating seller:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// DELETE /api/sellers/:id - Delete a seller's account
+app.delete('/api/sellers/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const seller = await Seller.findByIdAndDelete(id);
+    if (!seller) {
+      return res.status(404).json({ message: 'Seller not found' });
+    }
+    res.status(200).json({ message: 'Seller deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting seller:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 });

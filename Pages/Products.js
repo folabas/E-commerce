@@ -83,7 +83,6 @@ const Products = () => {
   const { brand = "", category = "" } = route.params || {}; 
 
   useEffect(() => {
-    // Generate and filter the products based on brand and category
     const allProducts = generateProducts();
     const filteredProducts = allProducts.filter(
       (product) =>

@@ -1,13 +1,44 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useCart } from '../contexts/CartContext';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Toast from 'react-native-toast-message';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Home from './Home';
 
 const Cart = () => {
-  const { cart, incrementQuantity, decrementQuantity, removeFromCart } = useCart();
+  const { cart, incrementQuantity, decrementQuantity, removeFromCart, setCart } = useCart();
   const navigation = useNavigation();
+
+  // Load the cart from AsyncStorage when the component mounts
+  useEffect(() => {
+    const loadCartFromStorage = async () => {
+      try {
+        const savedCart = await AsyncStorage.getItem('cart');
+        if (savedCart) {
+          setCart(JSON.parse(savedCart));
+        }
+      } catch (error) {
+        console.error('Failed to load cart:', error);
+      }
+    };
+
+    loadCartFromStorage();
+  }, [setCart]);
+
+  // Function to save cart to AsyncStorage whenever it changes
+  const saveCartToStorage = async (cart) => {
+    try {
+      await AsyncStorage.setItem('cart', JSON.stringify(cart));
+    } catch (error) {
+      console.error('Failed to save cart:', error);
+    }
+  };
+
+  useEffect(() => {
+    saveCartToStorage(cart);
+  }, [cart]);
 
   const handleRemoveFromCart = (id, name) => {
     removeFromCart(id);
@@ -58,7 +89,7 @@ const Cart = () => {
   return (
     <View style={styles.container}>
       <View style={styles.fixedHeader}>
-        <TouchableOpacity style={styles.goBackIcon} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.goBackIcon} onPress={() => navigation.navigate('Home')}>
           <Icon name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerText}>Cart</Text>

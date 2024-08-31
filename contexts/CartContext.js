@@ -1,6 +1,5 @@
-// contexts/CartContext.js
-
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CartContext = createContext();
 
@@ -10,6 +9,35 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+
+  // Load the cart from AsyncStorage when the context initializes
+  useEffect(() => {
+    const loadCartFromStorage = async () => {
+      try {
+        const savedCart = await AsyncStorage.getItem('cart');
+        if (savedCart) {
+          setCart(JSON.parse(savedCart));
+        }
+      } catch (error) {
+        console.error('Failed to load cart:', error);
+      }
+    };
+
+    loadCartFromStorage();
+  }, []);
+
+  // Function to save the cart to AsyncStorage whenever it changes
+  const saveCartToStorage = async (cart) => {
+    try {
+      await AsyncStorage.setItem('cart', JSON.stringify(cart));
+    } catch (error) {
+      console.error('Failed to save cart:', error);
+    }
+  };
+
+  useEffect(() => {
+    saveCartToStorage(cart);
+  }, [cart]);
 
   const addToCart = (product) => {
     setCart((prevCart) => {
@@ -46,7 +74,7 @@ export const CartProvider = ({ children }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, incrementQuantity, decrementQuantity, removeFromCart }}>
+    <CartContext.Provider value={{ cart, addToCart, incrementQuantity, decrementQuantity, removeFromCart, setCart }}>
       {children}
     </CartContext.Provider>
   );

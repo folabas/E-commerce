@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User'); // Assuming you have a User model
-const bcrypt = require('bcryptjs'); // For password hashing
-const { check, validationResult } = require('express-validator'); // For validation
+const User = require('../models/User'); 
+const bcrypt = require('bcryptjs'); 
+const { check, validationResult } = require('express-validator'); 
 
 // Signup route
 router.post('/signup', [
-  // Validation middleware
   check('email', 'Email is required').isEmail(),
   check('password', 'Password is required').exists(),
   check('name', 'Name is required').notEmpty(),

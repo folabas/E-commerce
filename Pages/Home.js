@@ -128,12 +128,32 @@ const products = [
   },
 ];
 
+const banners = [
+  {
+    image: require("../images/banner1.jpg"),
+    title: "Exclusive Summer Collection",
+    buttonLabel: "Shop Now",
+  },
+  {
+    image: require("../images/banner2.jpg"),
+    title: "Trending Footwear",
+    buttonLabel: "Explore",
+  },
+  {
+    image: require("../images/banner3.jpg"),
+    title: "New Arrivals",
+    buttonLabel: "Discover",
+  },
+];
+
 const Home = () => {
   const [userName, setUserName] = useState("There");
   const [selectedBrand, setSelectedBrand] = useState(null);
   const navigation = useNavigation();
   const flatListRef = useRef(null);
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const bannerListRef = useRef(null);
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -149,6 +169,16 @@ const Home = () => {
 
     fetchUserName();
   }, []);
+
+  useEffect(() => {
+    const scrollInterval = setInterval(() => {
+      const nextIndex = (currentIndex + 1) % banners.length;
+      bannerListRef.current.scrollToIndex({ index: nextIndex, animated: true });
+      setCurrentIndex(nextIndex);
+    }, 3000);
+
+    return () => clearInterval(scrollInterval);
+  }, [currentIndex]);
 
   const isProductInWishlist = (productId) => {
     return wishlist.some((item) => item.id === productId);
@@ -180,7 +210,7 @@ const Home = () => {
     navigation.navigate("Products", { brand });
   };
   const handleViewAll = () => {
-    navigation.navigate('Products', { brand: null });
+    navigation.navigate("Products", { brand: null });
   };
 
   const { width } = Dimensions.get("window");
@@ -191,18 +221,18 @@ const Home = () => {
       <View style={styles.header}>
         <StatusBar barStyle="dark-content" />
         <View style={styles.headerTopRow}>
-          <TouchableOpacity>
-            <Icon
-              name="menu-outline"
-              size={24}
-              color="#000"
-              style={styles.menuIcon}
-              accessibilityLabel="Menu"
+          <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+            <Image
+              source={require("../images/Logo.png")}
+              style={styles.profileImage}
+              accessibilityLabel="Profile"
             />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Hi {userName}</Text>
+          <Text style={styles.headerTitle}>Hi, {userName}</Text>
           <View style={styles.headerRight}>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("NotificationScreen")}
+            >
               <Icon
                 name="notifications-outline"
                 size={24}
@@ -228,23 +258,32 @@ const Home = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.bannerContainer}>
-          <View style={styles.bannerContent}>
-            <View style={styles.textButtonContainer}>
-              <Text style={styles.bannerText}>
-                A look at the outfits of the month.
-              </Text>
-              <TouchableOpacity
-                style={styles.bannerButton}
-                accessibilityLabel="Buy Now"
-              >
-                <Text style={styles.bannerButtonText}>Buy Now</Text>
-              </TouchableOpacity>
-            </View>
-            <Image
-              source={require("../images/banner.jpg")}
-              style={styles.bannerImage}
-            />
-          </View>
+          <FlatList
+            ref={bannerListRef}
+            data={banners}
+            horizontal
+            pagingEnabled
+            snapToInterval={width + 20}
+            snapToAlignment="center"
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <View style={[styles.bannerContent, { width }]}>
+                <View style={styles.textButtonContainer}>
+                  <Text style={styles.bannerText}>{item.title}</Text>
+                  <TouchableOpacity
+                    style={styles.bannerButton}
+                    onPress={handleViewAll}
+                  >
+                    <Text style={styles.bannerButtonText}>
+                      {item.buttonLabel}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <Image source={item.image} style={styles.bannerImage} />
+              </View>
+            )}
+          />
         </View>
         <View style={styles.popularBrandContainer}>
           <Text style={styles.popularBrandTitle}>Popular Brand</Text>
@@ -278,7 +317,10 @@ const Home = () => {
         <View style={styles.mostPopularContainer}>
           <View style={styles.mostPopularHeader}>
             <Text style={styles.mostPopularTitle}>Most Popular</Text>
-            <TouchableOpacity onPress={handleViewAll}>
+            <TouchableOpacity
+              style={styles.viewAllButton}
+              onPress={handleViewAll}
+            >
               <Text style={styles.viewAll}>View All</Text>
             </TouchableOpacity>
           </View>
@@ -338,17 +380,20 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: "#fff",
-    paddingTop: 50,
+    paddingTop: 30,
     paddingHorizontal: 20,
-    paddingBottom: 25,
+    paddingBottom: 15,
     zIndex: 10,
   },
   headerTopRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 5,
   },
   headerTitle: {
+    marginLeft: -110,
+    marginTop: 15,
     fontSize: 18,
     fontWeight: "bold",
     color: "#000",
@@ -356,6 +401,15 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 55,
+    marginBottom: -15,
+    marginLeft: 5,
+    padding: 20,
+    backgroundColor: "#f5f5f5",
   },
   notificationIcon: {
     marginRight: 15,
@@ -365,81 +419,87 @@ const styles = StyleSheet.create({
   },
   bannerContainer: {
     marginHorizontal: 20,
-    marginTop: 20,
+    marginTop: 13,
     marginBottom: 20,
+    marginRight: -10,
+    marginLeft: -10,
+    paddingLeft: 20,
+    paddingRight: 20,
   },
   bannerContent: {
     flexDirection: "row",
     backgroundColor: "#f5f5f5",
-    borderRadius: 10,
-    padding: 15,
+    borderRadius: 15,
+    padding: 10,
+    paddingLeft: 20,
+    marginRight: 20,
     alignItems: "center",
+    overflow: "hidden",
   },
   textButtonContainer: {
     flex: 1,
+    maxWidth: "60%",
   },
   bannerText: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
+    flexWrap: "wrap",
   },
   bannerButton: {
     backgroundColor: "#000",
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    width: 110,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    marginTop: 20,
+    alignSelf: "flex-start",
   },
   bannerButtonText: {
     color: "#fff",
-    fontSize: 16,
+    fontWeight: "bold",
   },
   bannerImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
+    width: 140,
+    height: 140,
+    borderRadius: 20,
+    marginRight: 15,
   },
   popularBrandContainer: {
-    marginHorizontal: 20,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   popularBrandTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
+    marginLeft: 20,
     marginBottom: 10,
   },
   brandsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    paddingHorizontal: 10,
   },
   brandContainer: {
     marginRight: 10,
-    alignItems: "center",
   },
   logoContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 75,
+    height: 75,
+    borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f5f5f5",
   },
-  selectedLogo: {
-    borderColor: "#000",
-    borderWidth: 2,
-  },
   logo: {
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
     resizeMode: "contain",
   },
   brandName: {
     marginTop: 5,
+    fontSize: 12,
     textAlign: "center",
-    fontWeight: "bold",
   },
   mostPopularContainer: {
-    marginHorizontal: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   mostPopularHeader: {
     flexDirection: "row",
@@ -448,33 +508,36 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   mostPopularTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
   },
+  viewAllButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: "#000",
+    borderRadius: 5,
+  },
   viewAll: {
-    fontSize: 16,
-    color: "#0000ff",
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
   card: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
+    backgroundColor: "#f5f5f5",
     borderRadius: 10,
+    marginBottom: 10,
+    flexDirection: "row",
     padding: 10,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
   },
   cardImage: {
-    width: 90,
-    height: 110,
+    width: 80,
+    height: 80,
     borderRadius: 10,
+    marginRight: 10,
   },
   cardContent: {
     flex: 1,
-    marginLeft: 10,
+    justifyContent: "center",
   },
   cardHeader: {
     flexDirection: "row",
@@ -484,16 +547,17 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: "bold",
+    marginBottom: 5,
   },
   cardBrand: {
+    fontSize: 14,
     color: "#888",
-    marginTop: 5,
+    marginBottom: 5,
   },
   cardFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 10,
   },
   cardPrice: {
     fontSize: 16,
@@ -506,9 +570,11 @@ const styles = StyleSheet.create({
   cardRating: {
     marginLeft: 5,
     fontSize: 14,
+    color: "#888",
   },
   cardStock: {
     marginTop: 5,
+    fontSize: 12,
     color: "#888",
   },
 });

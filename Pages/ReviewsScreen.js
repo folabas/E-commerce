@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, ScrollView, Modal, FlatList, CheckBox } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import React, { useState, useEffect, } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, ScrollView, Modal, FlatList, Alert } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ReviewsScreen = ({ route }) => {
@@ -14,17 +15,38 @@ const ReviewsScreen = ({ route }) => {
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
-        const savedAddresses = await AsyncStorage.getItem('addresses');
-        if (savedAddresses) {
-          const parsedAddresses = JSON.parse(savedAddresses);
-          setAddresses(parsedAddresses);
+        const token = await AsyncStorage.getItem('authToken');
 
-          if (parsedAddresses.length > 0) {
-            setSelectedAddress(parsedAddresses[0].id);
+        if (!token) {
+          Alert.alert('Authentication Error', 'You need to be logged in to fetch addresses');
+          return;
+        }
+
+        const response = await fetch('http://192.168.153.32:5000/api/address', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Fetched addresses:', data);
+          if (Array.isArray(data)) {
+            setAddresses(data);
+
+            if (data.length > 0) {
+              setSelectedAddress(data[0].id || ''); // Ensure a fallback if id is undefined
+            }
+          } else {
+            console.error('Unexpected data structure:', data);
           }
+        } else {
+          console.error('Failed to fetch addresses:', response.status);
         }
       } catch (error) {
-        console.error('Failed to load addresses:', error);
+        console.error('Failed to fetch addresses:', error);
+        Alert.alert('Error', 'Failed to fetch addresses');
       }
     };
 
@@ -40,13 +62,27 @@ const ReviewsScreen = ({ route }) => {
     return total.toFixed(2);
   };
 
-  const renderCartItem = (item) => (
+  const calculateTax = () => {
+    const subtotal = parseFloat(calculateTotal());
+    const tax = subtotal * 0.25;
+    return tax.toFixed(2);
+  };
+
+  const calculateOrderTotal = () => {
+    const subtotal = parseFloat(calculateTotal());
+    const shippingFee = 5.00;
+    const tax = parseFloat(calculateTax());
+    const orderTotal = subtotal + shippingFee + tax;
+    return orderTotal.toFixed(2);
+  };
+
+  const renderCartItem = ({ item }) => (
     <View style={styles.cartItem} key={item.id}>
       <Image source={typeof item.image === 'string' ? { uri: item.image } : item.image} style={styles.cartItemImage} />
       <View style={styles.cartItemDetails}>
         <Text style={styles.cartItemName}>{item.name || ''}</Text>
         <Text style={styles.cartItemPrice}>{`$${(parseFloat(item.price) * item.quantity || 0).toFixed(2)}`}</Text>
-        <Text style={styles.cartItemInfo}>Color: {item.colors[0] || 'N/A'}  Size: {item.sizes[0] || 'N/A'}</Text>
+        <Text style={styles.cartItemInfo}>Color: {item.colors?.[0] || 'N/A'}  Size: {item.sizes?.[0] || 'N/A'}</Text>
         <Text style={styles.cartItemQuantity}>Quantity: {item.quantity || 0}</Text>
       </View>
     </View>
@@ -74,11 +110,12 @@ const ReviewsScreen = ({ route }) => {
       onPress={() => handleAddressSelection(item.id)}
     >
       <View style={styles.checkboxContainer}>
-        <CheckBox
-          value={selectedAddress === item.id}
-          onValueChange={() => handleAddressSelection(item.id)}
-        />
-        <Text style={styles.addressText}>{item.address}</Text>
+        <View style={styles.checkbox}>
+          {selectedAddress === item.id && (
+            <Ionicons name="checkmark-circle" size={24} color="green" />
+          )}
+        </View>
+        <Text style={styles.addressText}>{item.address || 'No address available'}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -92,7 +129,7 @@ const ReviewsScreen = ({ route }) => {
         <Text style={styles.headerText}>Order Review</Text>
       </View>
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-        {cartItems.map(item => renderCartItem(item))}
+        {cartItems.map(item => renderCartItem({ item }))}
 
         <View style={styles.promoCodeContainer}>
           <TextInput style={styles.promoCodeInput} placeholder="Have a promo code? Enter here" />
@@ -112,12 +149,12 @@ const ReviewsScreen = ({ route }) => {
               <Text style={styles.summaryValue}>$5.00</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Tax Fee:</Text>
-              <Text style={styles.summaryValue}>$20.00</Text>
+              <Text style={styles.summaryLabel}>Tax Fee (25%):</Text>
+              <Text style={styles.summaryValue}>${calculateTax()}</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryTotalLabel}>Order Total:</Text>
-              <Text style={styles.summaryTotal}>${(parseFloat(calculateTotal()) + 5 + 20).toFixed(2)}</Text>
+              <Text style={styles.summaryTotal}>${calculateOrderTotal()}</Text>
             </View>
           </View>
 
@@ -137,7 +174,9 @@ const ReviewsScreen = ({ route }) => {
             <View style={styles.sectionContent}>
               <View>
                 <Text style={styles.sectionTitle}>Shipping Address</Text>
-                <Text style={styles.sectionDetail}>{addresses.find(address => address.id === selectedAddress)?.address || 'No address selected'}</Text>
+                <Text style={styles.sectionDetail}>
+                  {addresses.find(address => address.id === selectedAddress)?.address || 'No address selected'}
+                </Text>
               </View>
               <TouchableOpacity onPress={handleChangeShippingAddress}>
                 <Text style={styles.changeText}>Change</Text>
@@ -147,7 +186,7 @@ const ReviewsScreen = ({ route }) => {
         </View>
       </ScrollView>
       <TouchableOpacity style={styles.checkoutButton}>
-        <Text style={styles.checkoutButtonText}>Checkout (${(parseFloat(calculateTotal()) + 5 + 20).toFixed(2)})</Text>
+        <Text style={styles.checkoutButtonText}>Checkout (${calculateOrderTotal()})</Text>
       </TouchableOpacity>
 
       {/* Modal for changing shipping address */}
@@ -165,9 +204,10 @@ const ReviewsScreen = ({ route }) => {
             {/* List of addresses */}
             <FlatList
               data={addresses}
-              keyExtractor={item => item.id}
+              keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()} // Ensure id is defined
               renderItem={renderAddressItem}
               contentContainerStyle={styles.addressList}
+              ListEmptyComponent={<Text>No addresses available</Text>}
             />
 
             <TouchableOpacity
@@ -399,4 +439,3 @@ const styles = StyleSheet.create({
 });
 
 export default ReviewsScreen;
-
