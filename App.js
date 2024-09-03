@@ -32,6 +32,7 @@ import SellerSignUp from "./Pages/SellerSignUp";  // Updated import
 import BusinessInfo from "./components/BusinessInfo";
 import ValidationInfo from "./components/ValidationInfo";
 import FacialVerification from "./components/FacialVerification";
+import HomeSellers from "./Pages/HomeSellers";
 
 const Stack = createNativeStackNavigator();
 
@@ -173,6 +174,9 @@ export default function App() {
             <Stack.Screen 
             name="FacialVerification"
             component={FacialVerification}/>
+            <Stack.Screen
+            name="HomeSellers"
+            component={HomeSellers}/>
           </Stack.Navigator>
           <StatusBar style="auto" />
         </NavigationContainer>

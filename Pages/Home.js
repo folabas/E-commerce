@@ -480,16 +480,16 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   logoContainer: {
-    width: 75,
-    height: 75,
+    width: 70,
+    height: 70,
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f5f5f5",
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 45,
     resizeMode: "contain",
   },
   brandName: {

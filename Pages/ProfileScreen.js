@@ -22,6 +22,9 @@ const ProfileScreen = ({ navigation }) => {
         const name = await AsyncStorage.getItem('userName');
         const email = await AsyncStorage.getItem('userEmail');
         const sellerStatus = await AsyncStorage.getItem('isSeller');
+
+        console.log('Fetched values:', { name, email, sellerStatus }); // Log fetched values
+
         if (name) {
           setUserName(name);
           setNewUserName(name);
@@ -29,7 +32,7 @@ const ProfileScreen = ({ navigation }) => {
         if (email) {
           setUserEmail(email);
         }
-        if (sellerStatus) {
+        if (sellerStatus !== null) {
           setIsSeller(JSON.parse(sellerStatus));
         }
       } catch (error) {
@@ -114,10 +117,10 @@ const ProfileScreen = ({ navigation }) => {
               <Text style={styles.userName}>{userName}</Text>
               <Text style={styles.userEmail}>{userEmail}</Text>
             </View>
-            {!isSeller && (
+            {isSeller && (
               <TouchableOpacity
                 style={styles.createSellerButton}
-                onPress={() => navigation.navigate('SellerSignUp')}
+                onPress={() => navigation.navigate('HomeSellers')}
               >
                 <Text style={styles.createSellerButtonText}>Switch To Seller</Text>
               </TouchableOpacity>

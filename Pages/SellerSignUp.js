@@ -10,20 +10,18 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
-import { TabView, SceneMap, TabBar } from "react-native-tab-view";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import BusinessInfo from "../components/BusinessInfo";
 import ValidationInfo from "../components/ValidationInfo";
 
 export default function SellerSignUp() {
   const [index, setIndex] = useState(0);
-  const [routes] = useState([
-    { key: "businessInfo", title: "Business Info" },
-    { key: "validationInfo", title: "Validation Info" },
-  ]);
 
+  // State for business and validation info
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "",
     businessEmail: "",
+    userEmail: "", // Add this field
     yearInBusiness: new Date(),
     phoneNumber: "",
     businessDescription: "",
@@ -34,7 +32,12 @@ export default function SellerSignUp() {
     socialMedia: "",
   });
 
+  // Handle account creation
   const handleCreateAccount = async () => {
+    if (!businessInfo.businessEmail || businessInfo.businessEmail.trim() === "") {
+      Alert.alert("Error", "Email is required and cannot be empty.");
+      return;
+    }
     try {
       console.log("Posting data:", { ...businessInfo, ...validationInfo });
       const response = await fetch("http://192.168.153.32:5000/api/sellers", {
@@ -50,7 +53,13 @@ export default function SellerSignUp() {
 
       const result = await response.json();
       if (response.ok) {
+        await AsyncStorage.setItem('isSeller', JSON.stringify(true));
         Alert.alert("Success", result.message);
+        
+        // Save the isSeller status to AsyncStorage
+        await AsyncStorage.setItem('isSeller', JSON.stringify(true));
+        console.log('Saved isSeller:', true);
+
       } else {
         Alert.alert("Error", result.message);
       }
@@ -60,23 +69,7 @@ export default function SellerSignUp() {
     }
   };
 
-  const renderScene = SceneMap({
-    businessInfo: () => (
-      <BusinessInfo
-        businessInfo={businessInfo}
-        setBusinessInfo={setBusinessInfo}
-        onNext={() => setIndex(1)}
-      />
-    ),
-    validationInfo: () => (
-      <ValidationInfo
-        validationInfo={validationInfo}
-        setValidationInfo={setValidationInfo}
-        onCreateAccount={handleCreateAccount}
-      />
-    ),
-  });
-
+  // Conditional rendering of BusinessInfo and ValidationInfo components
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -95,27 +88,23 @@ export default function SellerSignUp() {
           <Text style={styles.header}>Set up Seller's Account</Text>
         </View>
 
-        <TabView
-          navigationState={{ index, routes }}
-          renderScene={renderScene}
-          onIndexChange={setIndex}
-          initialLayout={initialLayout}
-          swipeEnabled={false}
-          renderTabBar={(props) => (
-            <TabBar
-              {...props}
-              indicatorStyle={{ backgroundColor: "#007bff" }}
-              style={{ backgroundColor: "white" }}
-              labelStyle={{ color: "#333", fontWeight: "bold" }}
-            />
-          )}
-        />
+        {index === 0 ? (
+          <BusinessInfo
+            businessInfo={businessInfo}
+            setBusinessInfo={setBusinessInfo}
+            onNext={() => setIndex(1)}
+          />
+        ) : (
+          <ValidationInfo
+            validationInfo={validationInfo}
+            setValidationInfo={setValidationInfo}
+            onCreateAccount={handleCreateAccount}
+          />
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
-const initialLayout = { width: Dimensions.get("window").width };
 
 const styles = StyleSheet.create({
   wrapper: {

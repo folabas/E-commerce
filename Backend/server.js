@@ -111,11 +111,22 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '3h' });
+
+    const isSeller = user.isSeller;
+
+    if (isSeller) {
+      console.log(`User ${user.email} is a seller.`);
+    } else {
+      console.log(`User ${user.email} is not a seller.`);
+    }
 
     res.status(200).json({
       token,
-      name: user.name
+      name: user.name,
+      isSeller: user.isSeller
     });
   } catch (error) {
     console.error('Login error:', error.message);
@@ -134,7 +145,7 @@ app.get('/api/auth/profile', authMiddleware, async (req, res) => {
     }
 
     // Check if the user is a seller
-    const isSeller = await Seller.findOne({ user: userId });
+    const isSeller = user.isSeller;
 
     res.status(200).json({
       name: user.name,
@@ -223,6 +234,7 @@ app.delete('/api/address/:id', authMiddleware, async (req, res) => {
 });
 
 // POST /api/sellers - Create a seller account
+// POST /api/sellers - Create a seller account
 app.post('/api/sellers', async (req, res) => {
   const {
     businessName,
@@ -232,19 +244,27 @@ app.post('/api/sellers', async (req, res) => {
     businessDescription,
     nin,
     socialMedia,
+    userEmail // Email of the user to be updated
   } = req.body;
 
-  try {
-    if (!businessEmail) {
-      return res.status(400).json({ message: 'Business email is required.' });
-    }
+  if (!businessEmail || !businessEmail.trim()) {
+    return res.status(400).json({ message: 'Business email is required.' });
+  }
 
-    // Check if a seller with the same email already exists
-    const existingSeller = await Seller.findOne({ businessEmail });
+  try {
+    // Start a session to ensure atomicity
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    // Check if a seller with the same businessEmail already exists
+    const existingSeller = await Seller.findOne({ businessEmail }).session(session);
     if (existingSeller) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ message: 'A seller with this email already exists.' });
     }
 
+    // Create the seller account
     const seller = new Seller({
       businessName,
       businessEmail,
@@ -255,8 +275,19 @@ app.post('/api/sellers', async (req, res) => {
       socialMedia,
     });
 
-    await seller.save();
-    res.status(201).json({ message: 'Seller account created successfully', seller });
+    await seller.save({ session });
+
+    // Update the isSeller status of the user
+    const user = await User.findOne({ email: userEmail }).session(session);
+    if (user) {
+      user.isSeller = true;
+      await user.save({ session });
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(201).json({ message: 'Seller account created successfully', seller, user });
   } catch (error) {
     if (error.code === 11000) {
       return res.status(400).json({ message: 'Duplicate key error: ' + error.message });
@@ -265,6 +296,9 @@ app.post('/api/sellers', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+
+
 
 // GET /api/sellers/:id - Get a seller's details by ID
 app.get('/api/sellers/:id', async (req, res) => {

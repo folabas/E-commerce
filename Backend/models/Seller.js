@@ -1,15 +1,37 @@
 const mongoose = require('mongoose');
 
-const SellerSchema = new mongoose.Schema({
-  businessName: String,
-  businessEmail: String,
-  yearInBusiness: Date,
-  phoneNumber: String,
-  businessDescription: String,
-  nin: String,
-  socialMedia: String,
-});
+const sellerSchema = new mongoose.Schema({
+  businessName: {
+    type: String,
+    required: true,
+  },
+  businessEmail: {
+    type: String,
+    required: [true, 'Business email is required'],
+    unique: true,
+    trim: true,
+    lowercase: true,
+  },
+  yearInBusiness: {
+    type: Date,
+    required: true,
+  },
+  phoneNumber: {
+    type: String,
+    required: true,
+  },
+  businessDescription: {
+    type: String,
+    required: true,
+  },
+  nin: {
+    type: Number,
+    required: true,
+  },
+  socialMedia: {
+    type: [String],
+    default: [],
+  },
+}, { timestamps: true });
 
-const Seller = mongoose.model('Seller', SellerSchema);
-
-module.exports = Seller;
+module.exports = mongoose.model('Seller', sellerSchema);
