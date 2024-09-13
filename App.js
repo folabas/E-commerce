@@ -1,5 +1,4 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet } from "react-native";
+import { Platform, StatusBar, StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { NavigationContainer } from "@react-navigation/native";
@@ -28,11 +27,16 @@ import ReviewsScreen from "./Pages/ReviewsScreen";
 import AddNewAddress from "./Pages/AddNewAddress";
 import NotificationScreen from "./components/NotificationScreen";
 import Reviews from "./Pages/Reviews";
-import SellerSignUp from "./Pages/SellerSignUp";  // Updated import
+import SellerSignUp from "./Pages/SellerSignUp";
 import BusinessInfo from "./components/BusinessInfo";
 import ValidationInfo from "./components/ValidationInfo";
 import FacialVerification from "./components/FacialVerification";
 import HomeSellers from "./Pages/HomeSellers";
+import OrdersPage from "./Pages/OrdersPage";
+import MyProducts from "./components/MyProducts";
+import AddProducts from "./Pages/AddProducts";
+import AddVariants from "./Pages/AddVariants";
+import ChatScreen from "./components/ChatScreen.js";
 
 const Stack = createNativeStackNavigator();
 
@@ -66,7 +70,8 @@ export default function App() {
           <Stack.Navigator
             initialRouteName="Onboarding"
             screenOptions={{
-              animationEnabled: false,
+              animationEnabled: Platform.OS === 'ios', // Use animation for iOS only
+              ...(Platform.OS === 'ios' ? TransitionPresets.ModalSlideFromBottomIOS : {}), // Apply iOS transition
             }}
           >
             <Stack.Screen
@@ -104,7 +109,7 @@ export default function App() {
               component={SearchScreen}
               options={{
                 headerShown: false,
-                ...TransitionPresets.ModalSlideFromBottomIOS,
+                ...(Platform.OS === 'ios' ? TransitionPresets.ModalSlideFromBottomIOS : {}),
               }}
             />
             <Stack.Screen
@@ -164,21 +169,28 @@ export default function App() {
               component={SellerSignUp}
               options={{ headerShown: false }}
             />
-            <Stack.Screen 
-            name="BusinessInfo"
-            component={BusinessInfo}/>
+            <Stack.Screen name="BusinessInfo" component={BusinessInfo} />
+            <Stack.Screen name="ValidationInfo" component={ValidationInfo} />
             <Stack.Screen
-            name="ValidationInfo"
-            component={ValidationInfo}
+              name="FacialVerification"
+              component={FacialVerification}
             />
-            <Stack.Screen 
-            name="FacialVerification"
-            component={FacialVerification}/>
             <Stack.Screen
-            name="HomeSellers"
-            component={HomeSellers}/>
+              name="HomeSellers"
+              component={HomeSellers}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="OrdersPage"
+              component={OrdersPage}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen name="MyProducts" component={MyProducts} />
+            <Stack.Screen name="AddProducts" component={AddProducts} />
+            <Stack.Screen name="AddVariants" component={AddVariants}/>
+            <Stack.Screen name="ChatScreen" component={ChatScreen}/>
           </Stack.Navigator>
-          <StatusBar style="auto" />
+          <StatusBar style={Platform.OS === 'ios' ? 'dark' : 'auto'} />
         </NavigationContainer>
         <Toast />
       </WishlistProvider>

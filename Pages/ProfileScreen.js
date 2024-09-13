@@ -92,6 +92,21 @@ const ProfileScreen = ({ navigation }) => {
       setProfileImage({ uri: result.uri });
     }
   };
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('userName');
+      await AsyncStorage.removeItem('userEmail');
+      await AsyncStorage.removeItem('isSeller');
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (error) {
+      console.error('Error during logout:', error);
+      Alert.alert('Logout Error', 'Failed to log out. Please try again.');
+    }
+  };
 
   if (loading) {
     return (
@@ -160,7 +175,7 @@ const ProfileScreen = ({ navigation }) => {
                   <Text style={styles.menuItemText}>Create Seller's Account</Text>
                 </TouchableOpacity>
               )}
-              <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Login')}>
+              <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
                 <Icon name="log-out-outline" size={24} color="#000" />
                 <Text style={styles.menuItemText}>Logout</Text>
               </TouchableOpacity>

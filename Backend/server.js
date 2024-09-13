@@ -9,6 +9,9 @@ const Address = require('./models/Address');
 const Seller = require('./models/Seller');
 const authMiddleware = require('./middleware/authMiddleware');
 const app = express();
+const Cart = require('./models/Carts')
+const Product = require('./models/Product')
+const Message = require('./models/Message')
 
 // Middleware
 app.use(cors({
@@ -234,7 +237,6 @@ app.delete('/api/address/:id', authMiddleware, async (req, res) => {
 });
 
 // POST /api/sellers - Create a seller account
-// POST /api/sellers - Create a seller account
 app.post('/api/sellers', async (req, res) => {
   const {
     businessName,
@@ -244,7 +246,7 @@ app.post('/api/sellers', async (req, res) => {
     businessDescription,
     nin,
     socialMedia,
-    userEmail // Email of the user to be updated
+    userEmail
   } = req.body;
 
   if (!businessEmail || !businessEmail.trim()) {
@@ -252,11 +254,10 @@ app.post('/api/sellers', async (req, res) => {
   }
 
   try {
-    // Start a session to ensure atomicity
+    
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    // Check if a seller with the same businessEmail already exists
     const existingSeller = await Seller.findOne({ businessEmail }).session(session);
     if (existingSeller) {
       await session.abortTransaction();
@@ -264,7 +265,6 @@ app.post('/api/sellers', async (req, res) => {
       return res.status(400).json({ message: 'A seller with this email already exists.' });
     }
 
-    // Create the seller account
     const seller = new Seller({
       businessName,
       businessEmail,
@@ -277,7 +277,6 @@ app.post('/api/sellers', async (req, res) => {
 
     await seller.save({ session });
 
-    // Update the isSeller status of the user
     const user = await User.findOne({ email: userEmail }).session(session);
     if (user) {
       user.isSeller = true;
@@ -348,6 +347,242 @@ app.delete('/api/sellers/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+
+
+app.get('/api/cart', authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const cart = await Cart.findOne({ user: userId }).populate('items.product');
+    if (!cart) {
+      return res.status(404).json({ message: 'Cart not found' });
+    }
+
+    res.status(200).json(cart);
+  } catch (error) {
+    console.error('Error fetching cart:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/cart - Add an item to the cart
+app.post('/api/cart', authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { productId, quantity } = req.body;
+
+  try {
+    let cart = await Cart.findOne({ user: userId });
+
+    if (!cart) {
+      cart = new Cart({ user: userId, items: [] });
+    }
+
+    const existingItem = cart.items.find(item => item.product.toString() === productId);
+
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      cart.items.push({ product: productId, quantity });
+    }
+
+    await cart.save();
+    res.status(200).json(cart);
+  } catch (error) {
+    console.error('Error adding item to cart:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// PUT /api/cart/:productId - Update the quantity of an item
+app.put('/api/cart/:productId', authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { productId } = req.params;
+  const { quantity } = req.body;
+
+  try {
+    const cart = await Cart.findOne({ user: userId });
+
+    if (!cart) {
+      return res.status(404).json({ message: 'Cart not found' });
+    }
+
+    const item = cart.items.find(item => item.product.toString() === productId);
+    if (item) {
+      item.quantity = quantity;
+      await cart.save();
+      res.status(200).json(cart);
+    } else {
+      res.status(404).json({ message: 'Item not found in cart' });
+    }
+  } catch (error) {
+    console.error('Error updating item quantity:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// DELETE /api/cart/:productId - Remove an item from the cart
+app.delete('/api/cart/:productId', authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { productId } = req.params;
+
+  try {
+    const cart = await Cart.findOne({ user: userId });
+
+    if (!cart) {
+      return res.status(404).json({ message: 'Cart not found' });
+    }
+
+    cart.items = cart.items.filter(item => item.product.toString() !== productId);
+    await cart.save();
+
+    res.status(200).json(cart);
+  } catch (error) {
+    console.error('Error removing item from cart:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+
+app.post('/api/products', authMiddleware, async (req, res) => {
+  const {
+    name, price, sku, description, weight, currency, category, variants, images, status
+  } = req.body;
+
+  try {
+    const newProduct = new Product({
+      name,
+      price,
+      sku,
+      description,
+      weight,
+      currency,
+      category,
+      variants: variants.map((v) => ({
+        size: v.size,
+        color: v.color,
+        stock: v.stock,
+        image: v.image,
+      })),
+      images,
+      sellerId: req.user.id, // Ensure seller's ID is saved with the product
+      status: status || 'draft', // Default to 'draft' if no status is provided
+    });
+
+    await newProduct.save();
+    res.status(201).json({ message: 'Product created successfully', product: newProduct });
+  } catch (error) {
+    console.error('Error creating product:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+
+
+
+
+app.get('/api/products', async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+// PUT /api/products/:id - Update a product by its ID
+app.put('/api/products', async (req, res) => {
+  const updatedData = req.body;
+
+  try {
+    const { filter, update } = updatedData;
+    const result = await Product.updateMany(filter, update, { new: true });
+
+    res.status(200).json({ message: 'Products updated successfully', result });
+  } catch (error) {
+    console.error('Error updating products:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+
+// DELETE /api/products/:id - Delete a single product by its ID
+app.delete('/api/products/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await Product.findByIdAndDelete(id);
+    if (result) {
+      res.status(200).json({ message: 'Product deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'Product not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting product:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+// GET /api/messages/:productId/:userId
+app.get('/api/messages/:productId/:userId', authMiddleware, async (req, res) => {
+  const { productId, userId } = req.params;
+
+  try {
+    const messages = await Message.find({
+      productId,
+      $or: [
+        { senderId: req.user.id, receiverId: userId },
+        { senderId: userId, receiverId: req.user.id }
+      ]
+    }).populate('senderId receiverId', 'name email');
+
+    res.status(200).json(messages);
+  } catch (error) {
+    console.error('Error fetching messages:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+// POST /api/messages
+app.post('/api/messages', authMiddleware, async (req, res) => {
+  const { receiverId, productId, message } = req.body;
+
+  if (!receiverId || !productId || !message) {
+    return res.status(400).json({ message: 'Receiver ID, product ID, and message are required' });
+  }
+
+  try {
+    const newMessage = new Message({
+      senderId: req.user.id,
+      receiverId,
+      productId,
+      message
+    });
+
+    await newMessage.save();
+    res.status(201).json({ message: 'Message sent successfully', message: newMessage });
+  } catch (error) {
+    console.error('Error sending message:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
+
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

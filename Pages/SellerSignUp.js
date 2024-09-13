@@ -40,7 +40,7 @@ export default function SellerSignUp() {
     }
     try {
       console.log("Posting data:", { ...businessInfo, ...validationInfo });
-      const response = await fetch("http://192.168.153.32:5000/api/sellers", {
+      const response = await fetch("http://192.168.37.32:5000/api/sellers", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

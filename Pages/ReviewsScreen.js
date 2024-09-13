@@ -22,7 +22,7 @@ const ReviewsScreen = ({ route }) => {
           return;
         }
 
-        const response = await fetch('http://192.168.153.32:5000/api/address', {
+        const response = await fetch('http://192.168.37.32:5000/api/address', {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,

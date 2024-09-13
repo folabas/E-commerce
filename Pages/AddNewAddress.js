@@ -27,7 +27,7 @@ const AddNewAddress = ({ navigation }) => {
         return;
       }
 
-      const response = await fetch('http://192.168.153.32:5000/api/address', {
+      const response = await fetch('http://192.168.37.32:5000/api/address', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const AddNewAddress = ({ navigation }) => {
         return;
       }
   
-      const response = await fetch('http://192.168.153.32:5000/api/address', {
+      const response = await fetch('http://192.168.37.32:5000/api/address', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ const AddNewAddress = ({ navigation }) => {
         return;
       }
 
-      const response = await fetch(`http://192.168.153.32:5000/api/address/${id}`, {
+      const response = await fetch(`http://192.168.37.32:5000/api/address/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

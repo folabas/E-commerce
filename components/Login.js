@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -25,6 +25,24 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
 
+  // Fetch saved credentials if "Remember Me" was checked
+  useEffect(() => {
+    const loadCredentials = async () => {
+      try {
+        const savedEmail = await AsyncStorage.getItem('savedEmail');
+        const rememberMeChecked = await AsyncStorage.getItem('rememberMeChecked');
+
+        if (rememberMeChecked === 'true') {
+          setEmail(savedEmail || '');
+          setChecked(true);
+        }
+      } catch (error) {
+        console.error("Failed to load saved credentials:", error);
+      }
+    };
+    loadCredentials();
+  }, []);
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Validation Error', 'Please fill in all fields.');
@@ -34,7 +52,7 @@ const Login = () => {
     try {
       console.log('Attempting to login with:', { email, password });
   
-      const response = await axios.post('http://192.168.153.32:5000/api/auth/login', {
+      const response = await axios.post('http://192.168.37.32:5000/api/auth/login', {
         email,
         password,
       });
@@ -42,12 +60,15 @@ const Login = () => {
       console.log('Login response:', response.data);
   
       const { token } = response.data;
+      // const { token, userId } = response.data;
+
   
       if (token) {
         await AsyncStorage.setItem('authToken', token);
+        // await AsyncStorage.setItem('userId',userId)
   
         // Fetch user profile after login
-        const profileResponse = await axios.get('http://192.168.153.32:5000/api/auth/profile', {
+        const profileResponse = await axios.get('http://192.168.37.32:5000/api/auth/profile', {
           headers: { Authorization: `Bearer ${token}` },
         });
   
@@ -58,6 +79,15 @@ const Login = () => {
         await AsyncStorage.setItem('userEmail', userEmail);
         await AsyncStorage.setItem('userName', name);
         await AsyncStorage.setItem('isSeller', JSON.stringify(isSeller));
+
+        // Remember the user's credentials if "Remember Me" is checked
+        if (isChecked) {
+          await AsyncStorage.setItem('savedEmail', email);
+          await AsyncStorage.setItem('rememberMeChecked', 'true');
+        } else {
+          await AsyncStorage.removeItem('savedEmail');
+          await AsyncStorage.setItem('rememberMeChecked', 'false');
+        }
   
         console.log('Login successful:', profileResponse.data);
   
@@ -76,8 +106,6 @@ const Login = () => {
     }
   };
   
-  
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -89,6 +117,8 @@ const Login = () => {
       >
         <View style={styles.logoContainer}>
           <Image source={require("../images/Logo.png")} style={styles.logoMain} />
+          <Text style={styles.logoText}>ProdigyMart</Text>
+
         </View>
         <View style={styles.textContainer}>
           <Text style={styles.title}>Welcome back,</Text>
@@ -174,12 +204,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 20,
   },
   logoMain: {
-    width: 80,
-    height: 80,
+    width: 50,
+    height: 50,
     resizeMode: "contain",
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginLeft: 5,
+    color: "#000",
   },
   textContainer: {
     alignItems: "center",
