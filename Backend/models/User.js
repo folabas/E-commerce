@@ -6,7 +6,8 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
   name: { type: String, required: true },
   surname: { type: String, required: true },
-  isSeller: {type: Boolean, default: false}
+  isSeller: {type: Boolean, default: false},
+  token: { type: String, default: null },
 });
 
 UserSchema.pre('save', async function (next) {

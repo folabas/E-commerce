@@ -55,7 +55,7 @@ const AddProducts = ({ navigation }) => {
               style={styles.picker}
               onValueChange={(itemValue) => setCurrency(itemValue)}
             >
-              <Picker.Item label="USD" value="USD" />
+              <Picker.Item label="NGN" value="NGN" />
               <Picker.Item label="EUR" value="EUR" />
               <Picker.Item label="GBP" value="GBP" />
             </Picker>
@@ -74,18 +74,27 @@ const AddProducts = ({ navigation }) => {
         {/* Category Dropdown */}
         <Text style={styles.label}>Category</Text>
         <View style={styles.pickerContainer}>
+        <ScrollView>
           <Picker
             selectedValue={category}
             style={styles.picker}
             onValueChange={(itemValue) => setCategory(itemValue)}
           >
             <Picker.Item label="Select category" value="" />
-            <Picker.Item label="Electronics" value="Electronics" />
-            <Picker.Item label="Clothing" value="Clothing" />
-            <Picker.Item label="Home & Garden" value="Home & Garden" />
-            <Picker.Item label="Beauty" value="Beauty" />
-            <Picker.Item label="Toys" value="Toys" />
+            <Picker.Item label="Customized T-shirt" value="Customized T-shirt" />
+            <Picker.Item label="Plain T-shirts" value="Plain T-shirts" />
+            <Picker.Item label="Sweatshirt" value="Sweatshirt" />
+            <Picker.Item label="Hoodie" value="Hoodie" />
+            <Picker.Item label="Shorts" value="Shorts" />
+            <Picker.Item label="Jersey" value="Jersey" />
+            <Picker.Item label="Pants" value="Pants" />
+            <Picker.Item label="Cargo Pants" value="Cargo Pants" />
+            <Picker.Item label="Trucker Hat" value="Trucker Hats" />
+            <Picker.Item label="Socks" value="Socks" />
+            <Picker.Item label="Varsity Jacket" value="Varsity Jacket" />
+            <Picker.Item label="Ties" value="Ties" />
           </Picker>
+          </ScrollView>
         </View>
 
         {/* Weight Input */}

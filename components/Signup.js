@@ -21,46 +21,42 @@ const Signup = () => {
   const navigation = useNavigation();
 
   const handleSignup = async () => {
-    // Validate input fields
     if (!email || !password || !confirmPassword || !name || !surname) {
       Alert.alert("Validation Error", "All fields are required.");
       return;
     }
-
+  
     if (password !== confirmPassword) {
       Alert.alert("Validation Error", "Passwords do not match.");
       return;
     }
-
+  
     try {
-      // Send data to the server
       const response = await axios.post(
-        "http://192.168.37.32:5000/api/auth/signup",
+        "http://192.168.115.32:5000/api/auth/signup",
         {
           email,
           password,
           name,
           surname,
-          emailUser: "folabas2@gmail.com",
-          emailPass: "fakvkwcqqzwkagim",
+          emailUser: "folabas2@gmail.com", // Use actual credentials if needed
+          emailPass: "fakvkwcqqzwkagim", // Use actual credentials if needed
         }
       );
-
+  
       if (response.status === 201) {
         Alert.alert("Success", "Account created successfully!");
         await AsyncStorage.setItem("userName", name);
         navigation.navigate("Login");
       } else {
-        Alert.alert(
-          "Error",
-          response.data.message || "An error occurred during signup."
-        );
+        Alert.alert("Error", response.data.message || "An error occurred during signup.");
       }
     } catch (error) {
-      console.error("Signup error:", error);
+      console.error("Signup error:", error.response ? error.response.data : error.message);
       Alert.alert("Error", "An unexpected error occurred.");
     }
   };
+  
 
   return (
     <View style={styles.container}>

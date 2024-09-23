@@ -1,27 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
   Image,
   Alert,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
 } from "react-native";
+import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BusinessInfo from "../components/BusinessInfo";
 import ValidationInfo from "../components/ValidationInfo";
+import axios from 'axios';
+import { jwtDecode } from "jwt-decode";
+
+
 
 export default function SellerSignUp() {
   const [index, setIndex] = useState(0);
+  const navigation = useNavigation();
 
   // State for business and validation info
   const [businessInfo, setBusinessInfo] = useState({
     businessName: "",
     businessEmail: "",
-    userEmail: "", // Add this field
+    userEmail: "",
     yearInBusiness: new Date(),
     phoneNumber: "",
     businessDescription: "",
@@ -32,6 +37,83 @@ export default function SellerSignUp() {
     socialMedia: "",
   });
 
+  const checkTokenValidity = (token) => {
+    if (!token) return false;
+    try {
+      const decoded = jwtDecode(token);
+      const now = Date.now() / 1000; // Convert to seconds
+      return decoded.exp > now; // true if the token is not expired
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return false; // Token is invalid or cannot be decoded
+    }
+  };
+
+  const refreshAccessToken = async () => {
+    try {
+      // Retrieve the refresh token from AsyncStorage or a similar storage solution
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+  
+      if (!refreshToken) {
+        console.log("Refresh token not found. User needs to log in again.");
+        Alert.alert("Error", "Session expired. Please log in again.");
+        return null;
+      }
+  
+      // Send the refresh token to the server to get a new access token
+      const response = await axios.post('http://192.168.115.32:5000/api/auth/refresh-token', {
+        refreshToken, // Include the refresh token in the request body
+      });
+  
+      const { token } = response.data;
+      
+      // Save the new access token and update the AsyncStorage
+      await AsyncStorage.setItem('authToken', token);
+      console.log("New token received:", token);
+  
+      return token;
+    } catch (error) {
+      // Improved error handling with detailed logging
+      console.error("Error refreshing token:", error.response?.data || error.message);
+      Alert.alert("Error", "Unable to refresh token. Please log in again.");
+      return null;
+    }
+  };
+  
+
+  const fetchUserEmail = async () => {
+    try {
+      let token = await AsyncStorage.getItem('authToken');
+      console.log("Current token being sent:", token); // Log token
+
+      // Check if the token is valid
+      if (!checkTokenValidity(token)) {
+        console.log("Token is invalid or expired. Refreshing token..."); // Log token validity check
+        token = await refreshAccessToken(); // Try to refresh the token
+        if (!token) return; // If refresh fails, exit
+      } else {
+        console.log("Token is valid."); // Log if token is valid
+      }
+
+      const response = await axios.get('http://192.168.115.32:5000/api/auth/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const { email } = response.data;
+      setBusinessInfo(prevInfo => ({
+        ...prevInfo,
+        userEmail: email,
+      }));
+    } catch (error) {
+      console.error("Error fetching user email:", error.response?.data?.message || error.message);
+      Alert.alert("Error", error.response ? error.response.data.message : error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserEmail();
+  }, []);
+
   // Handle account creation
   const handleCreateAccount = async () => {
     if (!businessInfo.businessEmail || businessInfo.businessEmail.trim() === "") {
@@ -40,34 +122,21 @@ export default function SellerSignUp() {
     }
     try {
       console.log("Posting data:", { ...businessInfo, ...validationInfo });
-      const response = await fetch("http://192.168.37.32:5000/api/sellers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...businessInfo,
-          ...validationInfo,
-        }),
+      const response = await axios.post("http://192.168.115.32:5000/api/sellers", {
+        ...businessInfo,
+        ...validationInfo,
       });
-
-      const result = await response.json();
-      if (response.ok) {
-        await AsyncStorage.setItem('isSeller', JSON.stringify(true));
-        Alert.alert("Success", result.message);
-        
-        // Save the isSeller status to AsyncStorage
-        await AsyncStorage.setItem('isSeller', JSON.stringify(true));
-        console.log('Saved isSeller:', true);
-
-      } else {
-        Alert.alert("Error", result.message);
-      }
+  
+      Alert.alert("Success", response.data.message);
+      // Save seller status to the backend
+      await axios.post("http://192.168.115.32:5000/api/sellers/status", { isSeller: true });
+      navigation.navigate('Profile');
     } catch (error) {
       console.error("Error:", error);
-      Alert.alert("Error", "An error occurred while creating your account.");
+      Alert.alert("Error", error.response?.data?.message || "An error occurred while creating your account.");
     }
   };
+  
 
   // Conditional rendering of BusinessInfo and ValidationInfo components
   return (

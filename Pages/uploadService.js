@@ -1,7 +1,7 @@
-// uploadService.js
-import { storage } from './firebaseConfig'; // Import the Firebase storage instance
+import { storage } from './firebaseConfig'; // Ensure this import path is correct
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
+// Function to upload an image and return its download URL
 export const uploadImageAsync = async (uri) => {
   try {
     // Convert the image URI to a blob

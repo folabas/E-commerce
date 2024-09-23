@@ -52,60 +52,60 @@ const Login = () => {
     try {
       console.log('Attempting to login with:', { email, password });
   
-      const response = await axios.post('http://192.168.37.32:5000/api/auth/login', {
+      // Make a login request to the backend
+      const response = await axios.post('http://192.168.115.32:5000/api/auth/login', {
         email,
         password,
       });
   
       console.log('Login response:', response.data);
+      const { accessToken, refreshToken, name, email: userEmail, isSeller } = response.data;
   
-      const { token } = response.data;
-      // const { token, userId } = response.data;
-
-  
-      if (token) {
-        await AsyncStorage.setItem('authToken', token);
-        // await AsyncStorage.setItem('userId',userId)
-  
-        // Fetch user profile after login
-        const profileResponse = await axios.get('http://192.168.37.32:5000/api/auth/profile', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-  
-        console.log('Profile response:', profileResponse.data);
-  
-        const { name, email: userEmail, isSeller } = profileResponse.data;
-  
-        await AsyncStorage.setItem('userEmail', userEmail);
-        await AsyncStorage.setItem('userName', name);
-        await AsyncStorage.setItem('isSeller', JSON.stringify(isSeller));
-
-        // Remember the user's credentials if "Remember Me" is checked
-        if (isChecked) {
-          await AsyncStorage.setItem('savedEmail', email);
-          await AsyncStorage.setItem('rememberMeChecked', 'true');
-        } else {
-          await AsyncStorage.removeItem('savedEmail');
-          await AsyncStorage.setItem('rememberMeChecked', 'false');
-        }
-  
-        console.log('Login successful:', profileResponse.data);
-  
-        navigation.navigate('Home');
-      } else {
-        throw new Error('Token not provided');
+      // Check if both tokens are received
+      if (!accessToken || !refreshToken) {
+        console.error('Access or refresh token is missing');
+        throw new Error('Access or refresh token not provided');
       }
+  
+      // Store both tokens for future use
+      await AsyncStorage.setItem('authToken', accessToken);
+      await AsyncStorage.setItem('refreshToken', refreshToken);
+  
+      // Store user information in AsyncStorage
+      await AsyncStorage.setItem('userEmail', userEmail);
+      await AsyncStorage.setItem('userName', name);
+      console.log('Profile response:', response.data);
+  
+      // Handle "Remember Me" functionality
+      if (isChecked) {
+        await AsyncStorage.setItem('savedEmail', email);
+        await AsyncStorage.setItem('rememberMeChecked', 'true');
+      } else {
+        await AsyncStorage.removeItem('savedEmail');
+        await AsyncStorage.setItem('rememberMeChecked', 'false');
+      }
+  
+      console.log('Login successful:', response.data);
+  
+      // If needed, use `isSeller` in memory for conditional logic
+      if (isSeller) {
+        console.log('User is a seller');
+      }
+  
+      // Navigate to the Home screen upon successful login
+      navigation.navigate('Home');
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || 'Login failed. Please try again.';
-      console.error('Login failed:', errorMessage);
-      Alert.alert(
-        'Login Failed',
-        errorMessage,
-        [{ text: 'OK' }]
-      );
+      const errorMessage =
+        error.response?.data?.message || error.message || 'Login failed. Please try again.';
+      console.error('Login failed:', error);
+      Alert.alert('Login Failed', errorMessage, [{ text: 'OK' }]);
     }
   };
   
+  
+  
+  
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -118,7 +118,6 @@ const Login = () => {
         <View style={styles.logoContainer}>
           <Image source={require("../images/Logo.png")} style={styles.logoMain} />
           <Text style={styles.logoText}>ProdigyMart</Text>
-
         </View>
         <View style={styles.textContainer}>
           <Text style={styles.title}>Welcome back,</Text>

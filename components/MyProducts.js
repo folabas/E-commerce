@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios'
 
-const API_URL = 'http://192.168.37.32:5000/api/products';
+const API_URL = 'http://192.168.115.32:5000/api/products';
 
 const MyProducts = ({ navigation }) => {
   const [products, setProducts] = useState([]);
@@ -14,16 +16,21 @@ const MyProducts = ({ navigation }) => {
   // Function to fetch products
   const fetchProducts = async () => {
     try {
-      console.log('Fetching products from:', API_URL);
-      const response = await fetch(API_URL);
-      const responseText = await response.text();
-      console.log('Raw Response:', responseText);
-      
+      const token = await AsyncStorage.getItem('userToken');
+      console.log('Token for fetching products:', token); // Log the token
+  
+      const response = await fetch(API_URL, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+  
       if (!response.ok) {
         throw new Error('Failed to fetch products');
       }
   
-      const data = JSON.parse(responseText);
+      const data = await response.json();
       console.log('Fetched data:', data);
       setProducts(data);
     } catch (error) {
@@ -33,6 +40,10 @@ const MyProducts = ({ navigation }) => {
       setLoading(false);
     }
   };
+  
+  
+  
+  
 
   useEffect(() => {
     fetchProducts();
@@ -107,13 +118,12 @@ const MyProducts = ({ navigation }) => {
   const renderItem = ({ item }) => {
     console.log('Item:', item);
     const firstVariant = item.variants && item.variants.length > 0 ? item.variants[0] : null;
-    
-  
+
     return (
       <TouchableWithoutFeedback onPress={handlePress}>
         <View style={styles.productRow}>
           {item.images && item.images.length > 0 ? (
-            <Image source={{ uri: item.images[0].url }} style={styles.productImage}  onError={(error) => console.log('Image load error:', error)}/>
+            <Image source={{ uri: item.images[0].url }} style={styles.productImage} onError={(error) => console.log('Image load error:', error)} />
           ) : (
             <View style={styles.noImageContainer}>
               <Text>No Image Available</Text>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://192.168.37.32:5000/api/messages';
+const API_URL = 'http://192.168.115.32:5000/api/messages';
 
 const ChatScreen = ({ route, navigation }) => {
   console.log(route.params); // Debugging line

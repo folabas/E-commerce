@@ -76,6 +76,11 @@ const productSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  sellerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Seller',
+    required: true, // Ensure that a product always has an associated seller
+  },
 });
 
 const Product = mongoose.model('Product', productSchema);

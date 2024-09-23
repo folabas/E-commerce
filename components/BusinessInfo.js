@@ -14,6 +14,7 @@ const BusinessInfo = ({ businessInfo, setBusinessInfo, onNext }) => {
   const {
     businessName,
     businessEmail,
+    userEmail,
     yearInBusiness,
     phoneNumber,
     businessDescription,
@@ -75,12 +76,9 @@ const BusinessInfo = ({ businessInfo, setBusinessInfo, onNext }) => {
 
         <Text>Your Email</Text>
         <TextInput
-          placeholder="Your Email"
           style={styles.input}
-          value={businessInfo.userEmail}
-          onChangeText={(text) =>
-            setBusinessInfo({ ...businessInfo, userEmail: text })
-          }
+          value={userEmail}
+          editable={false}
         />
 
         <View style={styles.row}>

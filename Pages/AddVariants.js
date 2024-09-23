@@ -4,6 +4,18 @@ import { Card } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker'; 
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
+import { uploadImageAsync } from "./uploadService";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Request media library permissions
+const requestMediaLibraryPermissions = async () => {
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (status !== 'granted') {
+    Alert.alert('Permission required', 'We need access to your media library to select images.');
+    return false;
+  }
+  return true;
+};
 
 const AddVariants = ({ route, navigation }) => {
   const { productName, price, sku, description, weight, currency, category } = route.params;
@@ -30,25 +42,37 @@ const AddVariants = ({ route, navigation }) => {
   };
 
   const pickImage = async (index) => {
+    const hasPermission = await requestMediaLibraryPermissions();
+    if (!hasPermission) {
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
     });
 
-
-    console.log('ImagePicker result:', result);
-  
-    if (!result.canceled) {
-      const newVariants = [...variants];
-      
-      newVariants[index].image = result.assets[0].uri; 
-      setVariants(newVariants);
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const imageUri = result.assets[0]?.uri; // Safe access to uri
+      if (imageUri) {
+        try {
+          const imageUrl = await uploadImageAsync(imageUri);
+          console.log('Uploaded Image URL:', imageUrl); // Log the URL for debugging
+          const newVariants = [...variants];
+          newVariants[index].image = imageUrl;
+          setVariants(newVariants);
+        } catch (error) {
+          Alert.alert('Error', 'Failed to upload image');
+          console.error('Image upload error:', error);
+        }
+      } else {
+        Alert.alert('Error', 'Image URI is undefined');
+      }
     } else {
       Alert.alert('Image selection was canceled');
     }
   };
-  
 
   const validateVariants = () => {
     for (const variant of variants) {
@@ -80,25 +104,50 @@ const AddVariants = ({ route, navigation }) => {
       variants,
     });
   
+    // Ensure `variants` array includes image URLs
+    const productData = {
+      productName,
+      price,
+      sku,
+      description,
+      weight,
+      currency,
+      category,
+      variants: variants.map((v) => ({
+        size: v.size,
+        color: v.color,
+        stock: v.stock,
+        image: v.image,
+      })),
+      images: variants.map((v) => ({
+        url: v.image,
+        altText: 'Product Image',
+      })),
+    };
+  
     try {
-      const response = await fetch('http://192.168.37.32:5000/api/products', {
+      const token = await AsyncStorage.getItem('authToken');
+    
+      if (!token) {
+        Alert.alert('Error', 'No token found. Please log in again.');
+        console.log('No token found in AsyncStorage');
+        return;
+      }
+  
+      // Log the token for debugging
+      console.log('Retrieved token:', token)
+
+      const response = await fetch('http://192.168.115.32:5000/api/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          productName,
-          price,
-          sku,
-          description,
-          weight,
-          currency,
-          category,
-          variants,
-        }),
+        body: JSON.stringify(productData),
       });
   
       const responseText = await response.text();
+  
       console.log('Server Response:', responseText);
   
       try {
@@ -106,6 +155,7 @@ const AddVariants = ({ route, navigation }) => {
   
         if (response.ok) {
           Alert.alert('Success', result.message);
+          navigation.navigate('HomeSellers'); // Navigate to HomeSellers screen
         } else {
           Alert.alert('Error', result.message);
         }
@@ -117,8 +167,6 @@ const AddVariants = ({ route, navigation }) => {
       console.error('Error saving product:', error);
     }
   };
-  
-  
   
 
   return (
@@ -262,81 +310,78 @@ const styles = StyleSheet.create({
   pickerContainer: {
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#fff',
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginBottom: 15,
   },
   picker: {
     height: 50,
     width: '100%',
   },
-  variantContainer: {
+  imageBox: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 20,
     marginBottom: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 200,
+  },
+  imagePreview: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 5,
+  },
+  browseImageText: {
+    fontSize: 16,
+    color: '#555',
+  },
+  customColorInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
+  },
+  variantContainer: {
+    marginBottom: 20,
   },
   variantHeader: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
   },
   deleteButton: {
-    padding: 8,
+    marginLeft: 'auto',
   },
-  imageBox: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    marginBottom: 15,
-    alignItems: 'center',
-    height: 150,  // Adjusting height for the image container
-    justifyContent: 'center', // Center the text or image inside
+  addButton: {
+    backgroundColor: '#28a745',
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginVertical: 15,
   },
-  browseImageText: {
-    color: '#888',
-    fontSize: 16,
+  addButtonText: {
+    fontSize: 18,
+    color: '#fff',
+    textAlign: 'center',
   },
-  imagePreview: {
-    width: 150,  // Increase the width of the image preview
-    height: 150, // Adjust height to maintain aspect ratio
-    resizeMode: 'cover',  // Image preview should cover the space
+  saveButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 15,
+    borderRadius: 5,
+  },
+  saveButtonText: {
+    fontSize: 18,
+    color: '#fff',
+    textAlign: 'center',
   },
   divider: {
     height: 1,
     backgroundColor: '#ddd',
-    marginVertical: 10,
-  },
-  addButton: {
-    backgroundColor: '#ddd',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  addButtonText: {
-    color: '#333',
-    fontSize: 16,
-  },
-  saveButton: {
-    backgroundColor: '#0A2540',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    marginVertical: 15,
   },
   productDetails: {
     marginBottom: 20,
-  },
-  customColorInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 10,
-    backgroundColor: '#fff',
-    marginBottom: 15,
   },
 });
 

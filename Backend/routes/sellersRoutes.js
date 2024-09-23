@@ -48,7 +48,7 @@
 // //       return res.status(400).json({ message: 'Invalid credentials' });
 // //     }
 
-// //     const token = jwt.sign({ id: seller._id }, process.env.JWT_SECRET, { expiresIn: '3h' });
+// //     const token = jwt.sign({ id: seller._id }, process.env.JWT_SECRET, { expiresIn: '7h' });
 
 // //     res.status(200).json({ 
 // //       token, 
